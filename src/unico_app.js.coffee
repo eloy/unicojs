@@ -1,17 +1,17 @@
 class UnicoEvaluator
-  constructor: (@ctrl, @scope={}) ->
+  constructor: (@ctrl, @scope=false) ->
     @keys = []
     @values = []
-    @extractParams()
+    @extractParams(@ctrl)
+    @extractParams(@scope) if @scope
 
-  extractParams: ->
-    for k, v of @ctrl
+  extractParams: (ctx) ->
+    for k, v of ctx
       @keys.push k
-      @values.push v
-
-    for k, v of @scope
-      @keys.push k
-      @values.push v
+      if typeof(v) == "function"
+        @values.push @buildFunctionProxy k, v, @ctrl
+      else
+        @values.push v
 
   interpolate: (html) ->
     html.replace /{{(.+)}}/g, (match, capture) =>
@@ -22,12 +22,18 @@ class UnicoEvaluator
       cmd = "return #{str};"
       args = @keys.concat [cmd]
       func = Function(@keys, cmd)
-      return func.apply(null, @values)
-    catch
+      return func.apply(@ctrl, @values)
+    catch error
+      console.error error
       return ""
 
   child: (scope) ->
     new UnicoEvaluator @ctrl, scope
+
+  buildFunctionProxy: (k, v, ctrl) ->
+    () ->
+      v.call ctrl, arguments
+
 
 extractAttributes = (el) ->
   attrs = {}
@@ -79,10 +85,18 @@ dom2nodes = (el) ->
 
   return nodes
 
+buildCallbacks = (attrs, ev) ->
+  if attrs['click']
+    attrs['onClick'] = ->
+      ev.eval attrs['click']
+
 
 nodes2react = (nodes, ev) ->
   el = []
   for node in nodes
+
+    # Build callbacks
+    buildCallbacks node.attrs, ev if node.attrs
 
     if node.repeat?
       collection = ev.eval node.repeat.collectionExpression
