@@ -1,31 +1,5 @@
-html2react = (el, ev) ->
-  nodes = []
-  for child in el.contents()
-    tagName = $(child).prop('tagName')?.toLowerCase()
-    attrs = {}
-
-    if tagName && child.attributes.length > 0
-      attr_length = child.attributes.length - 1
-      for i in [0..attr_length]
-        key = child.attributes[i].name
-        value = child.attributes[i].value
-
-        key = "className" if key == "class"
-        attrs[key] = value
-
-    if tagName && $(child).children().length > 0
-      childNodes = html2react $(child, ev)
-      elements = [attrs].concat childNodes
-      nodes.push React.DOM[tagName].apply(null, elements)
-    else
-      if tagName
-        nodes.push React.DOM[tagName] attrs, $(child).html()
-      else
-        nodes.push child.textContent
-  return nodes
-
 class UnicoEvaluator
-  constructor: (@ctrl) ->
+  constructor: (@ctrl, @scope={}) ->
     @keys = []
     @values = []
     @extractParams()
@@ -34,6 +8,14 @@ class UnicoEvaluator
     for k, v of @ctrl
       @keys.push k
       @values.push v
+
+    for k, v of @scope
+      @keys.push k
+      @values.push v
+
+  interpolate: (html) ->
+    html.replace /{{(.+)}}/g, (match, capture) =>
+      @eval capture
 
   eval: (str) ->
     try
@@ -44,10 +26,100 @@ class UnicoEvaluator
     catch
       return ""
 
+  child: (scope) ->
+    new UnicoEvaluator @ctrl, scope
+
+extractAttributes = (el) ->
+  attrs = {}
+  return attrs unless el.attributes and el.attributes.length > 0
+  length = el.attributes.length - 1
+  for i in [0..length]
+    key = el.attributes[i].name
+    value = el.attributes[i].value
+
+    # Do some transformations for react
+    key = "className" if key == "class"
+
+    # Assign the value
+    attrs[key] = value
+
+  return attrs
+
+requireEvaluator = (str) ->
+  str.match(/{{.+}}/) != null
+
+dom2nodes = (el) ->
+  nodes = []
+  for child in el.contents()
+    tagName = $(child).prop('tagName')?.toLowerCase()
+    attrs = extractAttributes(child)
+
+    if tagName && attrs.repeat?
+      exp = attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\w\d_\(\)\$\[\]\.]+)/)
+      keyName = exp[1]
+      valueName = exp[2]
+      collectionExpression = exp[3]
+      childNodes = dom2nodes $(child)
+      nodes.push { tag: tagName, attrs: attrs, nodes: childNodes, repeat: {keyName: keyName, valueName: valueName, collectionExpression: collectionExpression} }
+
+    # If node has childs, deep into
+    else if tagName && $(child).children().length > 0
+      childNodes = dom2nodes $(child)
+      nodes.push { tag: tagName, attrs: attrs, nodes: childNodes }
+    else
+      if tagName
+        value = $(child).val() || $(child).html()
+        evaluate = requireEvaluator value
+        nodes.push { tag: tagName, attrs: attrs, value: value, evaluate: evaluate }
+      else
+        value = child.textContent
+        if value.trim().length > 0
+          evaluate = requireEvaluator value
+          nodes.push { text: value, evaluate: evaluate }
+
+  return nodes
+
+
+nodes2react = (nodes, ev) ->
+  el = []
+  for node in nodes
+
+    if node.repeat?
+      collection = ev.eval node.repeat.collectionExpression
+      if collection instanceof Array
+        for item in collection
+          scope = {}
+          scope[node.repeat.keyName] = item
+          reactNodes = nodes2react node.nodes, ev.child(scope)
+          el.push React.DOM[node.tag] node.attrs, reactNodes
+
+    # Node with childrens
+    else if node.nodes && node.nodes.length > 0
+      reactNodes = nodes2react node.nodes, ev
+      el.push React.DOM[node.tag] node.attrs, reactNodes
+
+    # Node without childrens
+    else if node.tag
+      if node.evaluate
+        value = ev.interpolate node.value
+      else
+        value = node.value
+      el.push React.DOM[node.tag] node.attrs, value
+
+    # Text Node
+    else if node.text?
+      if node.evaluate
+        value = ev.interpolate(node.text)
+      else
+        value = node.text
+      el.push value
+  return el
+
 class UnicoInstance
   constructor: (@ctrl, @el) ->
     @ev = new UnicoEvaluator(@ctrl)
     @html = @el.html()
+    @rootNode = @parseDOM()
     @translate()
     @refresh()
 
@@ -55,17 +127,21 @@ class UnicoInstance
     React.renderComponent @reactClass(), @el[0]
 
   translate: ->
+    # TODO: check if root is text
+    root = @rootNode
+    ev = @ev
+    @reactClass = React.createClass displayName: "Version", render: ->
+      nodes = nodes2react root.nodes, ev
+      elements = [root.attrs].concat nodes
+      React.DOM[root.tag].apply(null, elements)
+
+
+  parseDOM: ->
     tagName = @el.prop('tagName').toLowerCase()
-    @reactClass = React.createClass displayName: "Version", render: =>
-      nodes = html2react $("<html><body><#{tagName}>#{@interpolate(@html)}</#{tagName}></body></html>"), @ev
-      elements = [null].concat nodes
-      React.DOM[tagName].apply(null, elements)
+    attrs = extractAttributes(@el)
+    nodes = dom2nodes(@el)
+    { tag: tagName, attrs: attrs, nodes: nodes }
 
-
-
-  interpolate: (html) ->
-    html.replace /{{(.+)}}/g, (match, capture) =>
-      @ev.eval capture
 
 # Main app
 #----------------------------------------------------------------------
