@@ -2,38 +2,85 @@ class UnicoEvaluator
   constructor: (@ctrl, @scope=false) ->
     @keys = []
     @values = []
-    @extractParams(@ctrl)
-    @extractParams(@scope) if @scope
-
-  extractParams: (ctx) ->
-    for k, v of ctx
-      @keys.push k
-      if typeof(v) == "function"
-        @values.push @buildFunctionProxy k, v, @ctrl
-      else
-        @values.push v
+    @_watchExpressions = {}
+    @_changeListeners = []
+    @_childsScopes = []
+    @_extractParams(@ctrl)
+    @_extractParams(@scope) if @scope
 
   interpolate: (html) ->
     html.replace /{{(.+)}}/g, (match, capture) =>
       @eval capture
 
-  eval: (str) ->
+  eval: (expression) ->
     try
-      cmd = "return #{str};"
+      # Execute expression
+      cmd = "return #{expression};"
       args = @keys.concat [cmd]
       func = Function(@keys, cmd)
-      return func.apply(@ctrl, @values)
+      value = func.apply(@ctrl, @values)
+
+      # Cache value for latest digest
+      @_watchExpressions[expression] = value
+      return value
     catch error
       console.error error
       return ""
 
+  buildCallbacks: (attrs) ->
+    if attrs['click']
+      attrs['onClick'] = =>
+        ret = @eval attrs['click']
+        @_digest()
+        return ret
+
+
+  # Return a new evalutor with a copy of this, plus the given scope.
+  # Used for each loops
   child: (scope) ->
-    new UnicoEvaluator @ctrl, scope
+    childEv = new UnicoEvaluator @ctrl, scope
+    @_childsScopes.push childEv
+    childEv
 
-  buildFunctionProxy: (k, v, ctrl) ->
-    () ->
-      v.call ctrl, arguments
+  # Check if the given string contains expressions. If so, store that
+  # expressions for digest and return true. Return false if not
+  # expression found
+  watch: (str) ->
+    str.match(/{{.+}}/) != null
 
+  _digest: ->
+    @_triggerChange() if @_changed()
+
+  # Return true if some value change Whenever the view evaluate an
+  # expression, we store the returned value.  With this function we
+  # evaluate every expression in this context or childrens and return
+  # true as soon as we found a diffrence
+  _changed: ->
+    for exp, old of @_watchExpressions
+      newValue = @evalexp
+      return true if newValue != old
+    for c in @_childsScopes
+      return true if c.changed()
+    return false
+
+  addChangeListener: (callback) ->
+    @_changeListeners.push callback
+
+  _extractParams: (ctx) ->
+    for k, v of ctx
+      @keys.push k
+      if typeof(v) == "function"
+        @values.push @_buildFunctionProxy k, v, @ctrl
+      else
+        @values.push v
+
+
+  _buildFunctionProxy: (k, v, ctrl) ->
+    () -> v.apply ctrl, arguments
+
+  _triggerChange: ->
+    for callback in @_changeListeners
+      callback()
 
 extractAttributes = (el) ->
   attrs = {}
@@ -51,10 +98,7 @@ extractAttributes = (el) ->
 
   return attrs
 
-requireEvaluator = (str) ->
-  str.match(/{{.+}}/) != null
-
-dom2nodes = (el) ->
+dom2nodes = (el, ev) ->
   nodes = []
   for child in el.contents()
     tagName = $(child).prop('tagName')?.toLowerCase()
@@ -65,38 +109,30 @@ dom2nodes = (el) ->
       keyName = exp[1]
       valueName = exp[2]
       collectionExpression = exp[3]
-      childNodes = dom2nodes $(child)
+      childNodes = dom2nodes $(child), ev
       nodes.push { tag: tagName, attrs: attrs, nodes: childNodes, repeat: {keyName: keyName, valueName: valueName, collectionExpression: collectionExpression} }
 
     # If node has childs, deep into
     else if tagName && $(child).children().length > 0
-      childNodes = dom2nodes $(child)
+      childNodes = dom2nodes $(child), ev
       nodes.push { tag: tagName, attrs: attrs, nodes: childNodes }
     else
       if tagName
         value = $(child).val() || $(child).html()
-        evaluate = requireEvaluator value
-        nodes.push { tag: tagName, attrs: attrs, value: value, evaluate: evaluate }
+        nodes.push { tag: tagName, attrs: attrs, value: value, evaluate: ev.watch(value) }
       else
         value = child.textContent
         if value.trim().length > 0
-          evaluate = requireEvaluator value
-          nodes.push { text: value, evaluate: evaluate }
+          nodes.push { text: value, evaluate: ev.watch(value) }
 
   return nodes
-
-buildCallbacks = (attrs, ev) ->
-  if attrs['click']
-    attrs['onClick'] = ->
-      ev.eval attrs['click']
-
 
 nodes2react = (nodes, ev) ->
   el = []
   for node in nodes
 
     # Build callbacks
-    buildCallbacks node.attrs, ev if node.attrs
+    ev.buildCallbacks node.attrs if node.attrs
 
     if node.repeat?
       collection = ev.eval node.repeat.collectionExpression
@@ -135,6 +171,7 @@ class UnicoInstance
     @html = @el.html()
     @rootNode = @parseDOM()
     @translate()
+    @ev.addChangeListener => @refresh()
     @refresh()
 
   refresh: ->
@@ -153,7 +190,7 @@ class UnicoInstance
   parseDOM: ->
     tagName = @el.prop('tagName').toLowerCase()
     attrs = extractAttributes(@el)
-    nodes = dom2nodes(@el)
+    nodes = dom2nodes(@el, @ev)
     { tag: tagName, attrs: attrs, nodes: nodes }
 
 
