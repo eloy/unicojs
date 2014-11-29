@@ -9,7 +9,7 @@ class UnicoContext
     @_extractParams(@ctrl)
     @_extractParams(@scope) if @scope
   interpolate: (html) ->
-    html.replace /{{(.+)}}/g, (match, capture) =>
+    html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
       @eval capture
 
   eval: (expression) ->
@@ -152,7 +152,7 @@ dom2nodes = (el, ctx) ->
     attrs = extractAttributes(child)
 
     if tagName && attrs.repeat?
-      exp = attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\w\d_\(\)\$\[\]\.]+)/)
+      exp = attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\s\w\d\[\]_\(\)\.\$"']+)/)
       keyName = exp[1]
       valueName = exp[2]
       collectionExpression = exp[3]
