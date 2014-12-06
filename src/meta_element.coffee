@@ -1,21 +1,27 @@
 class MetaElement
-  constructor: (@el) ->
-    if @el.tagName
-      @tag = @el.tagName.toLowerCase()
-      @attrs = @_extractAttributes(@el)
-      nodes = @extractChildrens(@el)
+  constructor: (el) ->
+    @_extractMeta el
+
+  isValid: ->
+    @tag || @data
+
+  _extractMeta: (el) ->
+    if el.tagName
+      @tag = el.tagName.toLowerCase()
+      @attrs = @_extractAttributes(el)
+      nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
+    else
+      @data = el.data if el.data?.trim().length > 0
+      if @data && @data.match(/{{.+}}/) != null
+        @interpolate = @_splitInterpolated(@data)
 
-    # Set data and interpolation
-    @data = @el.data || @el.textContent
-
-    if @data && @data.match(/{{.+}}/) != null
-      @interpolate = @_splitInterpolated(@data)
-
-  extractChildrens: (parent) ->
+  # Extrac nodes from the given element
+  _extractChildrens: (parent) ->
     nodes = []
     for el in parent.childNodes
-      nodes.push new MetaElement(el)
+      meta = new MetaElement(el)
+      nodes.push meta if meta.isValid()
     return nodes
 
   # Transform html attributes into a hash
@@ -36,8 +42,6 @@ class MetaElement
       attrs[key] = value
 
     return attrs
-
-
 
   _splitInterpolated: (content) ->
     childs = []

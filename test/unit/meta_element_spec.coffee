@@ -1,7 +1,7 @@
 define (require, exports, module) ->
   describe 'MetaElement', ->
 
-    describe 'constructor', ->
+    describe '_extractMeta', ->
       it 'should generate a node from the given html element', ->
         html = '''<div id="root">foo</div>'''
         addFixture html
@@ -15,9 +15,10 @@ define (require, exports, module) ->
     # extractChildrens
     #----------------------------------------------------------------------
 
-    describe 'extractChildrens', ->
+    describe '_extractChildrens', ->
       it 'should return an array of metaNodes', ->
-        html = '''<div id="root">ping<br/>pong</div>'''
+        html = '''
+          <div id="root">ping<br/>pong</div>'''
         addFixture html
         el = new MetaElement getFixtureElement()
         expect(el.nodes.length).toBe 3
@@ -45,9 +46,9 @@ define (require, exports, module) ->
 
     describe "_splitInterpolated", ->
       it 'should return an array of strings and elements', ->
-        addFixture "<div>ola {{foo}} ase {{foo}}{{bar}}</div>"
-        el = new MetaElement getFixtureElement()
-        expect(el.interpolate).toEqual [
+        el = new MetaElement {}
+        html = "ola {{foo}} ase {{foo}}{{bar}}"
+        expect(el._splitInterpolated(html)).toEqual [
           {t: "text", v: "ola "},
           {t: "exp", v: "foo"},
           {t: "text", v: " ase "},
