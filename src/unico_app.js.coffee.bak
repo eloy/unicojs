@@ -1,30 +1,40 @@
+id_counter = 0
+newID = ->
+  id_counter += 1
+
 class UnicoContext
-  constructor: (@app, @ctrl, @scope=false) ->
+  constructor: (@app, @ctrl, @scope=false, @opt={}) ->
     @keys = []
     @values = []
     @_watchExpressions = {}
     @_changeListeners = []
     @_childsScopes = []
-    @_postRenderRequired = []
-    @_extractParams(@ctrl)
-    @_extractParams(@scope) if @scope
+
+
+  # Return a new evalutor with a copy of this, plus the given scope.
+  # Used for each loops
+  child: (scope, opt={}) ->
+    childEv = new UnicoContext @app, @ctrl, scope, opt
+    @_childsScopes.push childEv
+    childEv
+
   interpolate: (html) ->
     html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
       @eval capture
 
   eval: (expression) ->
+    @_extractParams(@ctrl)
+    @_extractParams(@scope) if @scope
+
     try
       # Execute expression
       cmd = "return #{expression};"
       args = @keys.concat [cmd]
       func = Function(@keys, cmd)
       value = func.apply(@ctrl, @values)
-
-      # Cache value for latest digest
-      @_watchExpressions[expression] = value
       return value
     catch error
-      console.error error
+      console.error error.stack
       return ""
 
   # Create callbacks attached to React elements at render time
@@ -38,16 +48,19 @@ class UnicoContext
 
   # Inspect the node for directives at inspection time
   buildNode: (node) ->
+    if node.content? && @watch node.content
+      # At this point, we break the conten into an array of strings
+      # and object, so "ola {{ke}} ase" will be transformed to ["ola
+      # ", exp_id, " ase"]
+      if @opt.repeat
+        node.interpolate = true
+      else
+        node.interpolate = @_splitInterpolated node.content
+
     @_attachDirectives node
     node
 
 
-  # Return a new evalutor with a copy of this, plus the given scope.
-  # Used for each loops
-  child: (scope) ->
-    childEv = new UnicoContext @ctrl, scope
-    @_childsScopes.push childEv
-    childEv
 
   # Check if the given string contains expressions. If so, store that
   # expressions for digest and return true. Return false if not
@@ -56,24 +69,34 @@ class UnicoContext
     str.match(/{{.+}}/) != null
 
 
-  triggerRender: (reactRender) ->
-    for node in @_postRenderRequired
-      ref =  reactRender.refs[node.attrs.ref]
-      if ref? && el=ref.getDOMNode()
-        for d in node.directives
-          d.link(@, el)
-          node.directiveLinked = true
-      else
-        @_postRenderRequired.delete node
+  props: ->
+    p = {}
+    for exp, data of @_watchExpressions
+      # Cache last value for digest later
+      data.value = @eval(exp)
+      p[data.property] = data.value
+    return p
+
+  propertyId: (exp) ->
+    if @opt.repeat
+      exp = @_watchExpressions[exp]
+      return false unless exp
+    else
+      exp = @_watchExpressions[exp] ||= { property: newID() }
+    exp.property
+
+
+  changed:  ->
+    @_triggerChange()
 
   _digest: ->
-    @_triggerChange() if @_changed()
+    @_triggerChange() if @_hasChanged()
 
   # Return true if some value change Whenever the view evaluate an
   # expression, we store the returned value.  With this function we
   # evaluate every expression in this context or childrens and return
   # true as soon as we found a diffrence
-  _changed: ->
+  _hasChanged: ->
     for exp, old of @_watchExpressions
       newValue = @ctxalexp
       return true if newValue != old
@@ -107,7 +130,7 @@ class UnicoContext
     for callback in @_changeListeners
       callback()
 
-  # Search for directives and initialize'em
+  # Search for directives and initialize'em at inspection time
   _attachDirectives: (node) ->
     for key, value of node.attrs
       if @app.directives[key]?
@@ -117,17 +140,26 @@ class UnicoContext
     # If node has no directives, we are done
     return false unless node.directives?
 
-    # Attach reference
-    node.attrs['ref'] ||= @_generateID()
-
-    # If node has directives, add it for later process
-    @_postRenderRequired.push node
-
+    node.attrs['key'] ||= @_generateID()
     # Init directives if init present
     for d in node.directives
       d.init(@, node) if d.init?
 
     return true
+
+
+  _splitInterpolated: (content) ->
+    childs = []
+    lastPos = 0
+    content.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture, pos) =>
+      if pos > lastPos
+        childs.push {t: "text", v: content.substr(lastPos, pos - lastPos)}
+
+      # Update lastPos
+      lastPos = pos + match.length
+      childs.push {t: "exp", v: capture, property: @propertyId(capture)}
+
+    childs
 
 extractAttributes = (el) ->
   attrs = {}
@@ -156,7 +188,8 @@ dom2nodes = (el, ctx) ->
       keyName = exp[1]
       valueName = exp[2]
       collectionExpression = exp[3]
-      childNodes = dom2nodes $(child), ctx
+      childCtx = ctx.child({}, repeat: true)
+      childNodes = dom2nodes $(child), childCtx
       nodes.push ctx.buildNode(tag: tagName, attrs: attrs, nodes: childNodes, repeat: {keyName: keyName, valueName: valueName, collectionExpression: collectionExpression})
 
     # If node has childs, deep into
@@ -166,55 +199,97 @@ dom2nodes = (el, ctx) ->
     else
       if tagName
         value = $(child).val() || $(child).html()
-        nodes.push ctx.buildNode(tag: tagName, attrs: attrs, value: value, evaluate: ctx.watch(value) )
+        nodes.push ctx.buildNode(tag: tagName, attrs: attrs, content: value )
       else
         value = child.textContent
         if value.trim().length > 0
-          nodes.push { text: value, evaluate: ctx.watch(value) }
+          nodes.push ctx.buildNode content: value
 
   return nodes
 
+interpolate2react = (interpolate, reactClass) ->
+  r = []
+  for i in interpolate
+    if i.t == 'text'
+      r.push i.v
+    else
+      r.push reactClass.props[i.property]
+  return r
 
-buildReactDOM = (tag, attrs, content) ->
-  node = React.DOM[tag] attrs, content
-  window.node = node
-  return node
 
-nodes2react = (nodes, ctx) ->
+buildReactDOM = (ctx, node, content) ->
+  if node.directives?
+    d.build(ctx, node) for d in node.directives when d.build
+
+
+  dom = React.DOM[node.tag] node.attrs, content
+  window.dom = dom
+  return dom unless node.directives?
+
+  renderCallback = -> dom
+  mountCallback = ->
+    el = this.getDOMNode()
+    for d in node.directives when d.link && !d._linked
+      d._linked = true
+      d.link(ctx, el, node, @)
+  reactHelpers = node.reactHelpers || {}
+  reactHelpers.render = renderCallback
+  reactHelpers.componentDidMount =  mountCallback
+  componentClass = React.createClass(reactHelpers)
+
+  componentClass()
+
+# Creates React elements from our tree
+#----------------------------------------------------------------------
+nodes2react = (nodes, ctx, reactClass,opt={}) ->
   el = []
   for node in nodes
 
     # Build callbacks
-    ctx.buildCallbacks node.attrs if node.attrs
+    unless node.repeat?
+      ctx.buildCallbacks node.attrs if node.attrs
 
     if node.repeat?
       collection = ctx.eval node.repeat.collectionExpression
-      if collection instanceof Array
-        for item in collection
-          scope = {}
-          scope[node.repeat.keyName] = item
-          reactNodes = nodes2react node.nodes, ctx.child(scope)
-          el.push buildReactDOM node.tag, node.attrs, reactNodes
+      reactClass = React.createClass repeat: true, render: ->
+        childs = []
+        if @props.data instanceof Array
+          for item in @props.data
+            scope = {}
+            scope[node.repeat.keyName] = item
+            childCtx = ctx.child(scope)
 
+            childs.push nodes2react node.nodes, childCtx, @, interpolate: true
+            # build callbacks with the childcontext
+        ctx.buildCallbacks node.attrs if node.attrs
+        buildReactDOM ctx, node, childs
+
+      el.push (new reactClass(data: collection))
     # Node with childrens
     else if node.nodes && node.nodes.length > 0
-      reactNodes = nodes2react node.nodes, ctx
-      el.push buildReactDOM node.tag, node.attrs, reactNodes
+      reactNodes = nodes2react node.nodes, ctx, reactClass, opt
+      el.push buildReactDOM ctx, node, reactNodes
 
     # Node without childrens
     else if node.tag
-      if node.evaluate
-        value = ctx.interpolate node.value
+      if node.interpolate?
+        if opt.interpolate
+          value = ctx.interpolate(node.content)
+        else
+          value = interpolate2react node.interpolate, reactClass
       else
-        value = node.value
-      el.push buildReactDOM node.tag, node.attrs, value
+        value = node.content
+      el.push buildReactDOM ctx, node, value
 
     # Text Node
-    else if node.text?
-      if node.evaluate
-        value = ctx.interpolate(node.text)
+    else if node.content?
+      if node.interpolate?
+        if opt.interpolate
+          value = ctx.interpolate(node.content)
+        else
+          value = interpolate2react node.interpolate, reactClass
       else
-        value = node.text
+        value = node.content
       el.push value
   return el
 
@@ -226,10 +301,9 @@ class UnicoInstance
     @translate()
     @ctx.addChangeListener => @refresh()
     @refresh()
-    @ctx.triggerRender(@reactRender)
 
   refresh: ->
-    @reactRender = React.renderComponent @reactClass(), @el[0]
+    @reactRender.setProps @ctx.props()
     return true
 
   translate: ->
@@ -237,10 +311,10 @@ class UnicoInstance
     root = @rootNode
     ctx = @ctx
     @reactClass = React.createClass displayName: "Version", render: ->
-      nodes = nodes2react root.nodes, ctx
+      nodes = nodes2react root.nodes, ctx, @
       elements = [root.attrs].concat nodes
       React.DOM[root.tag].apply(null, elements)
-
+    @reactRender = React.renderComponent @reactClass(@ctx.props()), @el[0]
 
   parseDOM: ->
     tagName = @el.prop('tagName').toLowerCase()
@@ -253,9 +327,30 @@ class UnicoInstance
 #----------------------------------------------------------------------
 
 class ModelDirective
-  link: (scope, el) ->
-    console.log el
+  build: (ctx, node) ->
+    @propertyId = ctx.propertyId(node.attrs.model)
 
+  link: (scope, el, node, reactElement) ->
+    # node.attrs.value = scope.eval node.attrs.model
+    # node.attrs.onChange = (e) ->
+    #   value = e.target.value
+    #   value = "'#{value}'" unless typeof(n) == "number"
+    #   exp = "this.#{node.attrs.model} = #{value};"
+    #   scope.eval exp
+
+    #   console.log value
+    console.log node.attrs
+    node.attrs.valueLink = {
+      value: scope.eval(node.attrs.model)
+      requestChange: (v) ->
+        @value = v
+        value = v
+        value = "'#{value}'" unless typeof(n) == "number"
+        exp = "this.#{node.attrs.model} = #{value};"
+        scope.eval exp
+        scope.changed()
+        return true
+    }
 
 # Main app
 #----------------------------------------------------------------------
@@ -263,7 +358,7 @@ class ModelDirective
 class UnicoApp
   constructor: ->
     @controllers = {}
-    @directives = {}
+    @directives = {model: ModelDirective}
 
   addController: (name, clazz) ->
     @controllers[name] = clazz
