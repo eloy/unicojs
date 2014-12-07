@@ -25,8 +25,6 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'src/unico_app.js.coffee',
-      'test/unit/unico_context.coffee'
     ],
 
 
