@@ -74,13 +74,20 @@ class MetaElement
         @directives.push { func: @ctx.app.directives[key] }
 
 
+  # Denormalize expression from collection in form
+  # "value in items()" or "key, value in items()
   _denormalizeRepeat: ->
     return unless @attrs?.repeat
     exp = @attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\s\w\d\[\]_\(\)\.\$"']+)/)
     return unless exp
-    keyName = exp[1]
-    labelName = exp[2]
+    exp_1 = exp[1]
+    exp_2 = exp[2]
     collectionExpression = exp[3]
     @repeat = true
-    @repeatExp = {key: keyName, exp: collectionExpression}
-    @repeatExp.label = labelName if labelName
+    @repeatExp = {src: collectionExpression}
+
+    if exp_2
+      @repeatExp.key = exp_1
+      @repeatExp.value = exp_2
+    else
+      @repeatExp.value = exp_1

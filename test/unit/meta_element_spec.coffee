@@ -85,9 +85,9 @@ describe 'MetaElement', ->
     describe 'as a collection', ->
       it 'should extract variables and expression from repeat attribute', ->
         meta = createMeta ctx, '''<div repeat="item in items()">Wadus</div>'''
-        expect(meta.repeatExp).toEqual {key: 'item', exp: 'items()'}
+        expect(meta.repeatExp).toEqual {value: 'item', src: 'items()'}
 
     describe 'as a hash', ->
       it 'should extract variables and expression from repeat attribute', ->
         meta = createMeta ctx, '''<div repeat="item, name in items()">Wadus</div>'''
-        expect(meta.repeatExp).toEqual {key: 'item', label: 'name' , exp: 'items()'}
+        expect(meta.repeatExp).toEqual {key: 'item', value: 'name' , src: 'items()'}
