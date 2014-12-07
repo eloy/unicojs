@@ -27,7 +27,7 @@ afterEach -> cleanFixture()
 # Factory Meta
 #----------------------------------------------------------------------
 
-createMeta = (html) ->
+createMeta = (ctx, html) ->
   el = document.createElement 'div'
   el.innerHTML = html
-  new MetaElement el.childNodes[0]
+  new MetaElement ctx, el.childNodes[0]

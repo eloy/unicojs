@@ -1,9 +1,11 @@
 describe 'MetaElement', ->
+  ctx = new UnicoContext new UnicoApp(), {}
+
   describe '_extractMeta', ->
     it 'should generate a node from the given html element', ->
       html = '''<div id="root">foo</div>'''
       addFixture html
-      el = new MetaElement getFixtureElement()
+      el = new MetaElement ctx, getFixtureElement()
       expect(el.tag).toBe 'div'
       expect(el.attrs.id).toBe 'root'
       expect(el.nodes.length).toBe 1
@@ -19,7 +21,7 @@ describe 'MetaElement', ->
       html = '''
         <div id="root">ping<br/>pong</div>'''
       addFixture html
-      el = new MetaElement getFixtureElement()
+      el = new MetaElement ctx, getFixtureElement()
       expect(el.nodes.length).toBe 3
       expect(el.nodes[0].tag).toBe undefined
       expect(el.nodes[0].data).toBe 'ping'
@@ -33,19 +35,19 @@ describe 'MetaElement', ->
     it 'should read attributes from element and return a hash', ->
       html = '''<div id="foo" if="view() > 0" data-bar="wadus" directive>blah blah</div>'''
       addFixture html
-      el = new MetaElement getFixtureElement()
+      el = new MetaElement ctx, getFixtureElement()
       expect(el.attrs).toEqual {id: 'foo', if: 'view() > 0', "data-bar": 'wadus', directive: ''}
 
     it 'should replace class with className', ->
       html = '''<div class="foo">blah blah</div>'''
       addFixture html
-      el = new MetaElement getFixtureElement()
+      el = new MetaElement ctx, getFixtureElement()
       expect(el.attrs).toEqual {className: 'foo'}
 
 
   describe "_splitInterpolated", ->
     it 'should return an array of strings and elements', ->
-      el = new MetaElement {}
+      el = new MetaElement ctx, {}
       html = "ola {{foo}} ase {{foo}}{{bar}} end"
       expect(el._splitInterpolated(html)).toEqual [
         {t: "text", v: "ola "},
@@ -55,3 +57,14 @@ describe 'MetaElement', ->
         {t: "exp", v: "bar"},
         {t: "text", v: " end"}
       ]
+
+
+
+  describe "_attachDirectives", ->
+    it 'should add directives', ->
+        app = new UnicoApp()
+        ctx = new UnicoContext app, {}
+        foo = {}
+        app.addDirective 'foo', foo
+        meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+        expect(meta.directives).toEqual [{func: foo}]

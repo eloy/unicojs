@@ -1,6 +1,7 @@
 class MetaElement
-  constructor: (el) ->
+  constructor: (@ctx, el) ->
     @_extractMeta el
+    @_attachDirectives()
 
   isValid: ->
     @tag || @data
@@ -21,7 +22,7 @@ class MetaElement
   _extractChildrens: (parent) ->
     nodes = []
     for el in parent.childNodes
-      meta = new MetaElement(el)
+      meta = new MetaElement(@ctx, el)
       nodes.push meta if meta.isValid()
     return nodes
 
@@ -44,6 +45,7 @@ class MetaElement
 
     return attrs
 
+    # Return an array with text contstants and variables interpolated
   _splitInterpolated: (content) ->
     childs = []
     lastPos = 0
@@ -60,3 +62,12 @@ class MetaElement
       childs.push {t: "text", v: content.substr(lastPos, content.length - lastPos)}
 
     return childs
+
+
+  # Search for directives and initialize'em at inspection time
+  _attachDirectives:  ->
+    return unless @attrs
+    for key, value of @attrs
+      if @ctx.app.directives[key]?
+        @directives ||= []
+        @directives.push { func: @ctx.app.directives[key] }
