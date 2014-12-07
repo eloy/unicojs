@@ -1,6 +1,7 @@
 class MetaElement
   constructor: (@ctx, el) ->
     @_extractMeta el
+    @_denormalizeRepeat()
     @_attachDirectives()
 
   isValid: ->
@@ -71,3 +72,15 @@ class MetaElement
       if @ctx.app.directives[key]?
         @directives ||= []
         @directives.push { func: @ctx.app.directives[key] }
+
+
+  _denormalizeRepeat: ->
+    return unless @attrs?.repeat
+    exp = @attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\s\w\d\[\]_\(\)\.\$"']+)/)
+    return unless exp
+    keyName = exp[1]
+    labelName = exp[2]
+    collectionExpression = exp[3]
+    @repeat = true
+    @repeatExp = {key: keyName, exp: collectionExpression}
+    @repeatExp.label = labelName if labelName

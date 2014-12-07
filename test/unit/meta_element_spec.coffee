@@ -44,6 +44,8 @@ describe 'MetaElement', ->
       el = new MetaElement ctx, getFixtureElement()
       expect(el.attrs).toEqual {className: 'foo'}
 
+  # _splitInterpolated
+  #----------------------------------------------------------------------
 
   describe "_splitInterpolated", ->
     it 'should return an array of strings and elements', ->
@@ -59,12 +61,33 @@ describe 'MetaElement', ->
       ]
 
 
+  # _attrachDirectives
+  #----------------------------------------------------------------------
 
   describe "_attachDirectives", ->
     it 'should add directives', ->
-        app = new UnicoApp()
-        ctx = new UnicoContext app, {}
-        foo = {}
-        app.addDirective 'foo', foo
-        meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
-        expect(meta.directives).toEqual [{func: foo}]
+      app = new UnicoApp()
+      ctx = new UnicoContext app, {}
+      foo = {}
+      app.addDirective 'foo', foo
+      meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+      expect(meta.directives).toEqual [{func: foo}]
+
+  # _denormalizeRepeat
+  #----------------------------------------------------------------------
+
+  describe '_denormalizeRepeat', ->
+    it 'should not set as repeat if expression does not match', ->
+      meta = createMeta ctx, '''<div repeat="items()">Wadus</div>'''
+      expect(meta.repeat).toBeFalse
+
+
+    describe 'as a collection', ->
+      it 'should extract variables and expression from repeat attribute', ->
+        meta = createMeta ctx, '''<div repeat="item in items()">Wadus</div>'''
+        expect(meta.repeatExp).toEqual {key: 'item', exp: 'items()'}
+
+    describe 'as a hash', ->
+      it 'should extract variables and expression from repeat attribute', ->
+        meta = createMeta ctx, '''<div repeat="item, name in items()">Wadus</div>'''
+        expect(meta.repeatExp).toEqual {key: 'item', label: 'name' , exp: 'items()'}
