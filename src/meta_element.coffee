@@ -12,6 +12,7 @@ class MetaElement
       nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
     else
+      @text = true
       @data = el.data if el.data?.trim().length > 0
       if @data && @data.match(/{{.+}}/) != null
         @interpolate = @_splitInterpolated(@data)
@@ -54,4 +55,8 @@ class MetaElement
       lastPos = pos + match.length
       childs.push {t: "exp", v: capture}
 
-    childs
+    # Add the end
+    if lastPos < content.length
+      childs.push {t: "text", v: content.substr(lastPos, content.length - lastPos)}
+
+    return childs

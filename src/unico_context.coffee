@@ -18,20 +18,20 @@ class UnicoContext
   #   html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
   #     @eval capture
 
-  # eval: (expression) ->
-  #   @_extractParams(@ctrl)
-  #   @_extractParams(@scope) if @scope
+  eval: (expression) ->
+    @_extractParams(@ctrl)
+    @_extractParams(@scope) if @scope
 
-  #   try
-  #     # Execute expression
-  #     cmd = "return #{expression};"
-  #     args = @keys.concat [cmd]
-  #     func = Function(@keys, cmd)
-  #     value = func.apply(@ctrl, @values)
-  #     return value
-  #   catch error
-  #     console.error error.stack
-  #     return ""
+    try
+      # Execute expression
+      cmd = "return #{expression};"
+      args = @keys.concat [cmd]
+      func = Function(@keys, cmd)
+      value = func.apply(@ctrl, @values)
+      return value
+    catch error
+      console.error error.stack
+      return ""
 
   # # Create callbacks attached to React elements at render time
   # buildCallbacks: (attrs) ->
@@ -107,19 +107,19 @@ class UnicoContext
   #   @counter ||= 0
   #   @counter += 1
 
-  # _extractParams: (ctx) ->
-  #   for k, v of ctx
-  #     @keys.push k
-  #     if typeof(v) == "function"
-  #       @values.push @_buildFunctionProxy k, v, @ctrl
-  #     else
-  #       @values.push v
+  _extractParams: (ctx) ->
+    for k, v of ctx
+      @keys.push k
+      if typeof(v) == "function"
+        @values.push @_buildFunctionProxy k, v, @ctrl
+      else
+        @values.push v
 
-  # # Create functions used in the evaluator.
-  # # Simplify sintax and emulate functions called in the controller scope
-  # # By example, we can use foo() and it will execute ctrl.foo()
-  # _buildFunctionProxy: (k, v, ctrl) ->
-  #   () -> v.apply ctrl, arguments
+  # Create functions used in the evaluator.
+  # Simplify sintax and emulate functions called in the controller scope
+  # For example, we can use foo() and it will execute ctrl.foo()
+  _buildFunctionProxy: (k, v, ctrl) ->
+    () -> v.apply ctrl, arguments
 
   # # Send an event to listeners with a change notification
   # _triggerChange: ->

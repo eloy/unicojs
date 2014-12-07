@@ -21,3 +21,13 @@ cleanFixture = ->
 
 # Clean fixtures after each test
 afterEach -> cleanFixture()
+
+
+
+# Factory Meta
+#----------------------------------------------------------------------
+
+createMeta = (html) ->
+  el = document.createElement 'div'
+  el.innerHTML = html
+  new MetaElement el.childNodes[0]
