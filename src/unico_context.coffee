@@ -19,11 +19,6 @@ class UnicoContext
     @_childsScopes.push childEv
     childEv
 
-  # interpolate: (html) ->
-  #   html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
-  #     @eval capture
-
-
   # eval: Evaluate expressions
   #----------------------------------------------------------------------
 
@@ -39,6 +34,12 @@ class UnicoContext
     catch error
       console.error(error.stack) if @app.debug
       return null
+
+  # Search and replace expressions in the given text
+  interpolate: (html) ->
+    html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
+      @eval capture
+
 
   # Extract elements in the context and store it in arrays for keys and values
   _extractParams: ->

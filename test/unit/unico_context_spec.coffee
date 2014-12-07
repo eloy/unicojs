@@ -27,6 +27,14 @@ describe "UnicoContext", ->
         ctx = new UnicoContext app, ctrl
         expect(ctx.eval("test")).toEqual 'foo'
 
+  # interpolate
+  #----------------------------------------------------------------------
+  describe 'interpolate', ->
+    it 'should replace expressions in string', ->
+      ctrl = {foo: 'F00', bar: (-> 'B44R')}
+      ctx = new UnicoContext app, ctrl
+      expect(ctx.interpolate("I saw {{foo}} in the {{bar()}}")).toEqual 'I saw F00 in the B44R'
+
 
   # child
   #----------------------------------------------------------------------
