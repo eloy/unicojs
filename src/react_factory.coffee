@@ -1,21 +1,21 @@
 ReactFactory =
   buildClass: (meta, ctx) ->
-    React.createClass displayName: "Version", render: ->
+    React.createClass render: ->
       ReactFactory.buildElement meta, ctx
 
   buildNodes: (nodes, ctx) ->
     r = []
     for meta in nodes
-      r.push ReactFactory.buildElement meta, ctx
+      r.push @buildElement meta, ctx
     return r
 
   buildElement: (meta, ctx) ->
     # Text elements
     if meta.text
-      return ReactFactory.buildTextElement meta, ctx
+      return @buildTextElement meta, ctx
     # HTML Elements
     if meta.nodes?
-      content =  ReactFactory.buildNodes meta.nodes, ctx
+      content =  @buildNodes meta.nodes, ctx
     else
       content = meta.data
     return React.DOM[meta.tag] meta.attrs, content
