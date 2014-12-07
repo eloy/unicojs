@@ -10,22 +10,15 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine', 'requirejs'],
-
-    // list of files / patterns to load in the browser
-    // files: [
-    //   'test/main.js',
-    //   'src/**/*.coffee',,
-    //   'test/**/*.coffee',
-    //   {pattern: 'node_modules/jsdom/lib/*.js', included: false},
-    // ],
+    // frameworks: ['jasmine', 'requirejs'],
+    frameworks: ['jasmine'],
 
     files: [
       'src/**/*.coffee',
-      { pattern: 'test/**/*_spec.coffee', included: false },
+      { pattern: 'test/**/*_spec.coffee', included: true },
       { pattern: 'test/support/*.coffee', included: true },
       { pattern: 'test/lib/*polyfill.js', included: true },
-      { pattern: 'test/lib/*.js', included: false, served: true },
+      { pattern: 'test/lib/*.js', included: true },
       'test/main.js'
     ],
 
