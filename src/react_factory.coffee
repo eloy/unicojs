@@ -13,8 +13,11 @@ ReactFactory =
     # Text elements
     if meta.text
       return @buildTextElement meta, ctx
+
+    if meta.repeat
+      content = @_buildRepeatNodes meta, ctx
     # HTML Elements
-    if meta.nodes?
+    else if meta.nodes?
       content =  @buildNodes meta.nodes, ctx
     else
       content = meta.data
@@ -29,4 +32,25 @@ ReactFactory =
         nodes.push exp.v
       else
         nodes.push ctx.eval(exp.v)
+    return nodes
+
+
+  _buildRepeatNodes: (meta, ctx) ->
+    nodes = []
+    src = ctx.eval meta.repeatExp.src
+    if src instanceof Array
+      for v in src
+        scope = {}
+        scope[meta.repeatExp.value] = v
+        childCtx = ctx.child scope
+        nodes.push @buildNodes meta.nodes, childCtx
+    else
+      for k,v of src
+        scope = {}
+        scope[meta.repeatExp.value] = v
+        if meta.repeatExp.key
+          scope[meta.repeatExp.key] = k
+        childCtx = ctx.child scope
+        nodes.push @buildElement meta.nodes, childCtx
+
     return nodes
