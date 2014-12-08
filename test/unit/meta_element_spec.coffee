@@ -63,19 +63,6 @@ describe 'MetaElement', ->
       ]
 
 
-  # _attrachDirectives
-  #----------------------------------------------------------------------
-
-  describe "_attachDirectives", ->
-    it 'should add directives', ->
-      app = new UnicoApp()
-      instance = {app: app}
-      ctx = new UnicoContext instance, {}
-      foo = {}
-      app.addDirective 'foo', foo
-      meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
-      expect(meta.directives).toEqual [{clazz: foo}]
-
   # _denormalizeRepeat
   #----------------------------------------------------------------------
 
@@ -102,3 +89,45 @@ describe 'MetaElement', ->
       it 'should extract variables and expression from repeat function', ->
         meta = createMeta ctx, '''<div repeat="item, name in items()">Wadus</div>'''
         expect(meta.repeatExp).toEqual {key: 'item', value: 'name' , src: 'items()'}
+
+  # _attachDirectives
+  #----------------------------------------------------------------------
+
+  describe "_attachDirectives", ->
+    it 'should add directives', ->
+      app = new UnicoApp()
+      instance = {app: app}
+      ctx = new UnicoContext instance, {}
+      foo = {}
+      app.addDirective 'foo', foo
+      meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+      expect(meta.directives).toEqual [{clazz: foo}]
+
+    it 'should create a reactClass', ->
+      app = new UnicoApp()
+      instance = {app: app}
+      ctx = new UnicoContext instance, {}
+      foo = {}
+      app.addDirective 'foo', foo
+      meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+      expect(meta.reactClass).toBeTruethly
+
+  # prepareIgnition
+  #----------------------------------------------------------------------
+
+  describe "prepareIgnition", ->
+    it 'should instantiate directives', ->
+      app = new UnicoApp()
+      instance = {app: app}
+      ctx = new UnicoContext instance, {}
+      class MyDirective
+        constructor: ->
+          @built = false
+        build: ->
+          @built = true
+
+      app.addDirective 'foo', MyDirective
+      meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+      meta.prepareIgnition(ctx)
+      directive = meta.directives[0].instance
+      expect(directive.built).toBeTrue

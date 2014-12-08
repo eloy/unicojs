@@ -14,6 +14,12 @@ ReactFactory =
     if meta.text
       return @buildTextElement meta, ctx
 
+    if meta.reactClass
+      # Duplicate current meta and remove the class to avoid infinete loop
+      metaDup = Object.create(meta)
+      metaDup.reactClass = false
+      return React.createElement meta.reactClass, {meta: metaDup, ctx: ctx}
+
     if meta.repeat
       content = @_buildRepeatNodes meta, ctx
     # HTML Elements
@@ -21,7 +27,10 @@ ReactFactory =
       content =  @buildNodes meta.nodes, ctx
     else
       content = meta.data
-    return React.DOM[meta.tag] meta.attrs, content
+
+     meta.prepareIgnition ctx
+     React.DOM[meta.tag] meta.attrs, content
+
 
 
   buildTextElement: (meta, ctx) ->

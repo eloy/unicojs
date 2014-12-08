@@ -4,8 +4,6 @@ class MetaElement
     @_denormalizeRepeat()
     @_attachDirectives()
 
-  isValid: ->
-    @tag || @data
 
   _extractMeta: (el) ->
     if el.tagName
@@ -24,7 +22,7 @@ class MetaElement
     nodes = []
     for el in parent.childNodes
       meta = new MetaElement(@ctx, el)
-      nodes.push meta if meta.isValid()
+      nodes.push meta if meta._isValid()
     return nodes
 
   # Transform html attributes into a hash
@@ -65,13 +63,35 @@ class MetaElement
     return childs
 
 
+  _isValid: ->
+    @tag || @data
+
+  # Called just before create the reactElement.
+  prepareIgnition: (ctx) ->
+    if @directives?
+      # Instantiate directives and call build if present
+      for d in @directives
+        d.instance = new d.clazz
+        d.instance.build(ctx, @) if d.instance.build?
+
   # Search for directives and initialize'em at inspection time
   _attachDirectives:  ->
     return unless @attrs
     for key, value of @attrs
       if @ctx.app.directives[key]?
         @directives ||= []
-        @directives.push { func: @ctx.app.directives[key] }
+        @directives.push { clazz: @ctx.app.directives[key] }
+
+    return unless @directives?
+
+    # Create reactClass
+    renderCallback = -> ReactFactory.buildElement @props.meta, @props.ctx
+    mountedCallback = ->
+      for d in @props.meta.directives
+        if d.instance?.link
+          d.instance.link @props.ctx, @getDOMNode(), @props.meta
+
+    @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback
 
 
   # Denormalize expression from collection in form

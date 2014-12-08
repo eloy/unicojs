@@ -14,6 +14,18 @@ describe 'ReactFactory', ->
         el = ReactFactory.buildElement meta, ctx
         # TODO: How to test this?
 
+    describe 'element with directives', ->
+      it 'should return the ReactClass', ->
+        app = new UnicoApp()
+        instance = {app: app}
+        ctx = new UnicoContext instance, {}
+        foo = {}
+        app.addDirective 'foo', foo
+        meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+        el = ReactFactory.buildElement meta, ctx
+        expect(el.props.ctx).toEqual ctx
+        expect(el.props.meta.reactClass).toBeFalse
+
     describe 'text element not interpolated', ->
       it 'should return a React element', ->
         ctrl = {info: 'foo'}
@@ -29,6 +41,8 @@ describe 'ReactFactory', ->
         meta = createMeta ctx, "Var is {{info}} end"
         el = ReactFactory.buildElement meta, ctx
         expect(el).toEqual ['Var is ', 'foo', ' end']
+
+
 
   # _buildRepeat
   #----------------------------------------------------------------------
