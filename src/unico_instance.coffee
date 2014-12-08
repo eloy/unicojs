@@ -1,6 +1,6 @@
 class UnicoInstance
   constructor: (@app, @ctrl, @el) ->
-    @ctx = new UnicoContext(@app, @ctrl)
+    @ctx = new UnicoContext(@, @ctrl)
 
     # Extract meta from the element
     @metaRoot = new MetaElement(@ctx, @el)
@@ -8,17 +8,6 @@ class UnicoInstance
     @reactElement = React.createElement(@reactClass)
     @reactRender = React.render @reactElement, @el
 
-    # @translate()
-    # @ctx.addChangeListener => @refresh()
-    # @refresh()
-
-  # refresh: ->
-  #   @reactRender.setProps @ctx.props()
-  #   return true
-
-  # buildReactClass: ->
-  #   root = @metaRoot
-  #   @reactClass = React.createClass displayName: "Version", render: ->
-  #     nodes = nodes2react root.nodes, ctx, @
-  #     elements = [root.attrs].concat nodes
-  #     React.DOM[root.tag].apply(null, elements)
+  refresh: ->
+    @reactRender.setProps()
+    return true

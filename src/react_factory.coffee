@@ -43,7 +43,9 @@ ReactFactory =
         scope = {}
         scope[meta.repeatExp.value] = v
         childCtx = ctx.child scope
-        nodes.push @buildNodes meta.nodes, childCtx
+        childNodes = Object.create(meta.nodes)
+        nodes.push @buildNodes childNodes, childCtx
+
     else
       for k,v of src
         scope = {}
@@ -51,6 +53,7 @@ ReactFactory =
         if meta.repeatExp.key
           scope[meta.repeatExp.key] = k
         childCtx = ctx.child scope
-        nodes.push @buildElement meta.nodes, childCtx
+        childNodes = Object.create(meta.nodes)
+        nodes.push @buildNodes childNodes, childCtx
 
     return nodes

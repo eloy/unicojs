@@ -1,5 +1,6 @@
 class UnicoContext
-  constructor: (@app, @ctrl, @scope=false, @opt={}) ->
+  constructor: (@instance, @ctrl, @scope=false, @opt={}) ->
+    @app = @instance.app
     @_watchExpressions = {}
     @_changeListeners = []
     @_childsScopes = []
@@ -15,7 +16,7 @@ class UnicoContext
     for key, index in p.keys
       scopeCtrl[key] = p.values[index]
 
-    childEv = new UnicoContext @app, scopeCtrl, scope, opt
+    childEv = new UnicoContext @instance, scopeCtrl, scope, opt
     @_childsScopes.push childEv
     childEv
 
@@ -71,44 +72,6 @@ class UnicoContext
   #       return ret
 
 
-  # # Inspect the node for directives at inspection time
-  # buildNode: (node) ->
-  #   if node.content? && @watch node.content
-  #     # At this point, we break the conten into an array of strings
-  #     # and object, so "ola {{ke}} ase" will be transformed to ["ola
-  #     # ", exp_id, " ase"]
-  #     if @opt.repeat
-  #       node.interpolate = true
-  #     else
-  #       node.interpolate = @_splitInterpolated node.content
-
-  #   @_attachDirectives node
-  #   node
-
-
-
-  # # Check if the given string contains expressions. If so, store that
-  # # expressions for digest and return true. Return false if not
-  # # expression found
-  # watch: (str) ->
-  #   str.match(/{{.+}}/) != null
-
-
-  # props: ->
-  #   p = {}
-  #   for exp, data of @_watchExpressions
-  #     # Cache last value for digest later
-  #     data.value = @eval(exp)
-  #     p[data.property] = data.value
-  #   return p
-
-  # propertyId: (exp) ->
-  #   if @opt.repeat
-  #     exp = @_watchExpressions[exp]
-  #     return false unless exp
-  #   else
-  #     exp = @_watchExpressions[exp] ||= { property: newID() }
-  #   exp.property
 
 
   # changed:  ->
@@ -142,34 +105,3 @@ class UnicoContext
   # _triggerChange: ->
   #   for callback in @_changeListeners
   #     callback()
-
-  # # Search for directives and initialize'em at inspection time
-  # _attachDirectives: (node) ->
-  #   for key, value of node.attrs
-  #     if @app.directives[key]?
-  #       node.directives ||= []
-  #       node.directives.push(new @app.directives[key]())
-
-  #   # If node has no directives, we are done
-  #   return false unless node.directives?
-
-  #   node.attrs['key'] ||= @_generateID()
-  #   # Init directives if init present
-  #   for d in node.directives
-  #     d.init(@, node) if d.init?
-
-  #   return true
-
-
-  # _splitInterpolated: (content) ->
-  #   childs = []
-  #   lastPos = 0
-  #   content.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture, pos) =>
-  #     if pos > lastPos
-  #       childs.push {t: "text", v: content.substr(lastPos, pos - lastPos)}
-
-  #     # Update lastPos
-  #     lastPos = pos + match.length
-  #     childs.push {t: "exp", v: capture, property: @propertyId(capture)}
-
-  #   childs

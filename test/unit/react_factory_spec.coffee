@@ -1,5 +1,7 @@
 describe 'ReactFactory', ->
   app = new UnicoApp()
+  instance = {app: app}
+
   # buildElement
   #----------------------------------------------------------------------
 
@@ -42,7 +44,7 @@ describe 'ReactFactory', ->
           </div>
         '''
         ctrl = {data: ['foo', 'bar']}
-        ctx = new UnicoContext app, ctrl
+        ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, html
         el = ReactFactory.buildElement meta, ctx
         # TODO: how to test this?

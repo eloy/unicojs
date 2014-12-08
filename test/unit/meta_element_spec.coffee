@@ -1,5 +1,7 @@
 describe 'MetaElement', ->
-  ctx = new UnicoContext new UnicoApp(), {}
+  app = new UnicoApp()
+  instance = {app: app}
+  ctx = new UnicoContext instance, {}
 
   describe '_extractMeta', ->
     it 'should generate a node from the given html element', ->
@@ -67,11 +69,12 @@ describe 'MetaElement', ->
   describe "_attachDirectives", ->
     it 'should add directives', ->
       app = new UnicoApp()
-      ctx = new UnicoContext app, {}
+      instance = {app: app}
+      ctx = new UnicoContext instance, {}
       foo = {}
       app.addDirective 'foo', foo
       meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
-      expect(meta.directives).toEqual [{func: foo}]
+      expect(meta.directives).toEqual [{clazz: foo}]
 
   # _denormalizeRepeat
   #----------------------------------------------------------------------
