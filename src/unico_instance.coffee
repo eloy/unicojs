@@ -1,6 +1,7 @@
 class UnicoInstance
   constructor: (@app, @ctrl, @el) ->
     @ctx = new UnicoContext(@, @ctrl)
+    @ctx.addChangeListener => @refresh()
 
     # Extract meta from the element
     @metaRoot = new MetaElement(@ctx, @el)
@@ -11,3 +12,9 @@ class UnicoInstance
   refresh: ->
     @reactRender.setProps()
     return true
+
+  digest: ->
+    @ctx.digest()
+
+  changed: ->
+    @ctx.changed()

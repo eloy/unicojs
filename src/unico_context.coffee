@@ -23,6 +23,7 @@ class UnicoContext
   # eval: Evaluate expressions
   #----------------------------------------------------------------------
 
+  # evaluate the given expression
   eval: (expression) ->
     p = @_extractParams()
     try
@@ -35,6 +36,7 @@ class UnicoContext
     catch error
       console.error(error.stack) if @app.debug
       return null
+
 
   # Search and replace expressions in the given text
   interpolate: (html) ->
@@ -62,46 +64,45 @@ class UnicoContext
     () -> v.apply ctrl, arguments
 
 
+  # Digest and change
+  #----------------------------------------------------------------------
 
-  # # Create callbacks attached to React elements at render time
-  # buildCallbacks: (attrs) ->
-  #   if attrs['click']
-  #     attrs['onClick'] = =>
-  #       ret = @eval attrs['click']
-  #       @_digest()
-  #       return ret
-
-
-
-
-  # changed:  ->
-  #   @_triggerChange()
-
-  # _digest: ->
-  #   @_triggerChange() if @_hasChanged()
-
-  # # Return true if some value change Whenever the view evaluate an
-  # # expression, we store the returned value.  With this function we
-  # # evaluate every expression in this context or childrens and return
-  # # true as soon as we found a diffrence
-  # _hasChanged: ->
-  #   for exp, old of @_watchExpressions
-  #     newValue = @ctxalexp
-  #     return true if newValue != old
-  #   for c in @_childsScopes
-  #     return true if c.changed()
-  #   return false
-
-  # addChangeListener: (callback) ->
-  #   @_changeListeners.push callback
-
-  # _generateID: ->
-  #   @counter ||= 0
-  #   @counter += 1
+  # Eval, cache and watch the given expression. Used at render time
+  # for storing values for digest
+  evalAndWatch: (exp) ->
+    return w if w = @_watchExpressions[exp]
+    value = @eval(exp)
+    @_watchExpressions[exp] = value
+    return value
 
 
+  # A change event is emited automaticaly on diges when some value
+  # change, or manually calling @changed()
+  addChangeListener: (callback) ->
+    @_changeListeners.push callback
 
-  # # Send an event to listeners with a change notification
-  # _triggerChange: ->
-  #   for callback in @_changeListeners
-  #     callback()
+  changed:  ->
+    # Cleanup cached values
+    @_cleanWatched()
+    # Call change listeners
+    c() for c in @_changeListeners
+
+  digest: ->
+    @changed() if @hasChanges()
+
+  # Return true if some value change Whenever the view evaluate an
+  # expression, we store the returned value.  With this function we
+  # evaluate every expression in this context or childrens and return
+  # true as soon as we found a diffrence
+  hasChanges: ->
+    for exp, old of @_watchExpressions
+      newValue = @eval(exp)
+      return true if newValue != old
+    for c in @_childsScopes
+      return true if c.hasChanges()
+    return false
+
+  _cleanWatched: ->
+    c._cleanWatched() for c in @_childsScopes
+    @_childsScopes = []
+    @_watchExpressions = {}

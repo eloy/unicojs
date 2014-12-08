@@ -24,5 +24,5 @@ class UnicoApp
 
   refresh: ->
     for instance in @instances
-      instance.refresh()
+      instance.changed()
     true

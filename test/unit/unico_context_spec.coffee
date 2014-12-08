@@ -65,3 +65,44 @@ describe "UnicoContext", ->
       subChild = child.child foo: 'LETS GO'
       expect(subChild.eval('foo')).toEqual 'LETS GO'
       expect(subChild.eval('bar')).toEqual 'HO'
+
+
+  describe 'evalAndWatch', ->
+    it 'should cache expression', ->
+      ctrl = {count: 0, val: (-> ++@count)}
+      ctx = new UnicoContext instance, ctrl
+      expect(ctx.evalAndWatch("val()")).toBe 1
+      expect(ctx.evalAndWatch("val()")).toBe 1
+      expect(ctrl.count).toBe 1
+
+  describe '_cleanWatched', ->
+    it 'should clean cache expression', ->
+      ctrl = {count: 0, val: (-> ++@count)}
+      ctx = new UnicoContext instance, ctrl
+      expect(ctx.evalAndWatch("val()")).toBe 1
+      ctx.changed()
+      expect(ctx.evalAndWatch("val()")).toBe 2
+
+
+  describe 'changed', ->
+    it 'should emit a change event', ->
+      ctrl = {foo: 'HEY'}
+      ctx = new UnicoContext instance, ctrl
+      changed = false
+      ctx.addChangeListener -> changed = true
+      ctx.changed()
+      expect(changed).toBeTrue
+
+
+  describe 'digest', ->
+    it 'should emit a change event if some watched value changed', ->
+      ctrl = {foo: 'HEY'}
+      ctx = new UnicoContext instance, ctrl
+      changed = false
+      ctx.addChangeListener -> changed = true
+      ctx.evalAndWatch 'foo'
+      ctx.digest()
+      expect(changed).toBe false
+      ctrl.foo = 'HO'
+      ctx.digest()
+      expect(changed).toBe true

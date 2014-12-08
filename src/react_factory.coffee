@@ -40,13 +40,13 @@ ReactFactory =
       if exp.t == 'text'
         nodes.push exp.v
       else
-        nodes.push ctx.eval(exp.v)
+        nodes.push ctx.evalAndWatch(exp.v)
     return nodes
 
 
   _buildRepeatNodes: (meta, ctx) ->
     nodes = []
-    src = ctx.eval meta.repeatExp.src
+    src = ctx.evalAndWatch meta.repeatExp.src
     if src instanceof Array
       for v in src
         scope = {}
