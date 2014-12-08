@@ -14,6 +14,13 @@ ReactFactory =
     if meta.text
       return @buildTextElement meta, ctx
 
+    # prepare meta for rendering. This initialize directives and call
+    # buid on them
+    meta.prepareIgnition ctx
+
+    # Hide elements if attribute hide is true retuning null
+    return null if meta.attrs.hide
+
     if meta.reactClass
       # Duplicate current meta and remove the class to avoid infinete loop
       metaDup = Object.create(meta)
@@ -28,8 +35,8 @@ ReactFactory =
     else
       content = meta.data
 
-     meta.prepareIgnition ctx
-     React.DOM[meta.tag] meta.attrs, content
+    # Finally, return the react element
+    return React.DOM[meta.tag] meta.attrs, content
 
 
 

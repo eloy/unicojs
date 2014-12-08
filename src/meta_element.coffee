@@ -71,7 +71,7 @@ class MetaElement
     if @directives?
       # Instantiate directives and call build if present
       for d in @directives
-        d.instance = new d.clazz
+        d.instance = new d.clazz()
         d.instance.build(ctx, @) if d.instance.build?
 
   # Search for directives and initialize'em at inspection time

@@ -6,6 +6,13 @@ describe 'ReactFactory', ->
   #----------------------------------------------------------------------
 
   describe 'buildElement', ->
+    it 'should return null if meta.attrs.hide is true', ->
+      ctrl = {info: 'foo'}
+      ctx = new UnicoContext ctrl
+      meta = createMeta ctx, "<button>foo</button>"
+      meta.attrs.hide = true
+      expect(ReactFactory.buildElement meta, ctx).toBe null
+
     describe 'html element', ->
       it 'should return a React element', ->
         ctrl = {info: 'foo'}
@@ -19,12 +26,22 @@ describe 'ReactFactory', ->
         app = new UnicoApp()
         instance = {app: app}
         ctx = new UnicoContext instance, {}
-        foo = {}
-        app.addDirective 'foo', foo
+        class TestDirective
+        app.addDirective 'foo', TestDirective
         meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
         el = ReactFactory.buildElement meta, ctx
         expect(el.props.ctx).toEqual ctx
-        expect(el.props.meta.reactClass).toBeFalse
+
+      it 'should duplicate meta and remove reactClass from them', ->
+        app = new UnicoApp()
+        instance = {app: app}
+        ctx = new UnicoContext instance, {}
+        class TestDirective
+        app.addDirective 'foo', TestDirective
+        meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
+        el = ReactFactory.buildElement meta, ctx
+        expect(el.props.meta.reactClass).toBe false
+        expect(meta.reactClass).not.toBeDefined
 
     describe 'text element not interpolated', ->
       it 'should return a React element', ->
