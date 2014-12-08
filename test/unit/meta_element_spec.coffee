@@ -12,7 +12,7 @@ describe 'MetaElement', ->
       expect(el.attrs.id).toBe 'root'
       expect(el.nodes.length).toBe 1
       expect(el.nodes[0].data).toBe 'foo'
-      expect(el.nodes[0].text).toBeTruethly
+      expect(el.nodes[0].text).toBeTruthy()
 
 
   # extractChildrens
@@ -69,7 +69,7 @@ describe 'MetaElement', ->
   describe '_denormalizeRepeat', ->
     it 'should not set as repeat if expression does not match', ->
       meta = createMeta ctx, '''<div repeat="items()">Wadus</div>'''
-      expect(meta.repeat).toBeFalse
+      expect(meta.repeat).toBeFalsy()
 
 
     describe 'as a collection', ->
@@ -110,7 +110,7 @@ describe 'MetaElement', ->
       foo = {}
       app.addDirective 'foo', foo
       meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
-      expect(meta.reactClass).toBeTruethly
+      expect(meta.reactClass).toBeTruthy()
 
   # prepareIgnition
   #----------------------------------------------------------------------
@@ -130,4 +130,4 @@ describe 'MetaElement', ->
       meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
       meta.prepareIgnition(ctx)
       directive = meta.directives[0].instance
-      expect(directive.built).toBeTrue
+      expect(directive.built).toBeTruthy()

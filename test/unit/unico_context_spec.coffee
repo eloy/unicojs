@@ -91,7 +91,7 @@ describe "UnicoContext", ->
       changed = false
       ctx.addChangeListener -> changed = true
       ctx.changed()
-      expect(changed).toBeTrue
+      expect(changed).toBeTruthy()
 
 
   describe 'digest', ->
