@@ -1,5 +1,5 @@
 class UnicoContext
-  constructor: (@instance, @ctrl, @scope=false, @opt={}) ->
+  constructor: (@instance, @ctrl, @scope={}) ->
     @app = @instance.app
     @_watchExpressions = {}
     @_changeListeners = []
@@ -11,12 +11,11 @@ class UnicoContext
   child: (scope, opt={}) ->
     # Build a childController with the content of this controller
     # including parent context and parent of parent context
-    scopeCtrl = {}
-    p = @_extractParams()
-    for key, index in p.keys
-      scopeCtrl[key] = p.values[index]
+    newScope = Object.create(@scope)
+    for key, value of scope
+      newScope[key] = value
 
-    childEv = new UnicoContext @instance, scopeCtrl, scope, opt
+    childEv = new UnicoContext @instance, @ctrl, newScope
     @_childsScopes.push childEv
     childEv
 
@@ -29,7 +28,6 @@ class UnicoContext
     try
       # Execute expression
       cmd = "return #{expression};"
-      args = p.keys.concat [cmd]
       func = Function(p.keys, cmd)
       value = func.apply(@ctrl, p.values)
       return value
@@ -54,7 +52,7 @@ class UnicoContext
         if typeof(v) == "function"
           values.push @_buildFunctionProxy k, v, @ctrl
         else
-          values.push v
+          values.push ctx[k]
     return keys: keys, values: values
 
   # Create functions used in the evaluator.
