@@ -8,7 +8,7 @@ module.exports = (grunt) ->
       compile:
         options: { bare: true }
         files: {
-          'dist/unico.js': 'src/*.coffee'
+          'dist/unico.js': ['src/*.coffee', 'src/directives/*.coffee']
         }
 
 

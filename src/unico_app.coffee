@@ -4,7 +4,7 @@
 class UnicoApp
   constructor: ->
     @controllers = {}
-    @directives = {}
+    @directives = UnicoApp.builtInDirectives || {}
 
   addController: (name, clazz) ->
     @controllers[name] = clazz

@@ -14,7 +14,8 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
     files: [
-      'src/**/*.coffee',
+      'src/*.coffee',
+      'src/directives/*.coffee',
       { pattern: 'test/**/*_spec.coffee', included: true },
       { pattern: 'test/support/*.coffee', included: true },
       { pattern: 'test/lib/*polyfill.js', included: true },
