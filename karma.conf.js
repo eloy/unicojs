@@ -14,13 +14,14 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
     files: [
+      'test/lib/*polyfill.js', // Browser polifyls for Phantom
       'lib/*.js',
       'src/*.coffee',
       'src/directives/*.coffee',
       'src/router/*.coffee',
       { pattern: 'test/**/*_spec.coffee', included: true },
       { pattern: 'test/support/*.coffee', included: true },
-      { pattern: 'test/lib/*polyfill.js', included: true },
+      { pattern: 'test/fixtures/*', included: false },
       { pattern: 'test/lib/*.js', included: true },
       'test/main.js'
     ],
