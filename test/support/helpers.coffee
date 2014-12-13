@@ -23,11 +23,13 @@ cleanFixture = ->
 afterEach -> cleanFixture()
 
 
-
-# Factory Meta
+# Factories
 #----------------------------------------------------------------------
 
+createCtx = (ctrl={})->
+  app = new UnicoApp()
+  instance = {app: app}
+  new UnicoContext instance, {}
+
 createMeta = (ctx, html) ->
-  el = document.createElement 'div'
-  el.innerHTML = html
-  new MetaElement ctx, el.childNodes[0]
+  MetaElement.fromStr ctx, html

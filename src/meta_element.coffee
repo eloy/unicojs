@@ -4,6 +4,12 @@ class MetaElement
     @_denormalizeRepeat()
     @_attachDirectives()
 
+  @fromStr: (ctx, html) ->
+    el = document.createElement 'div'
+    el.innerHTML = html
+    if el.childNodes.length != 1
+      new Error("fromStr require one single element")
+    new MetaElement ctx, el.childNodes[0]
 
   _extractMeta: (el) ->
     if el.tagName
