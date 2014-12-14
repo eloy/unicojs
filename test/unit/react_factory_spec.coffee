@@ -87,7 +87,7 @@ describe 'ReactFactory', ->
         view_meta = createMeta ctx, view_html
         el = ReactFactory.buildElement view_meta, ctx
         react = React.renderToString(el)
-        expect($(react).text()).toMatch 'foo bar'
+        expect($(react).text()).toEqual 'foo bar'
 
       it 'should accept templates defined inside the html', ->
         html = '''<div><div><span template="template_1"></span> bar</div><script type="text/html" id="template_1">foo</script><div>'''
@@ -97,7 +97,7 @@ describe 'ReactFactory', ->
         meta = createMeta ctx, html
         el = ReactFactory.buildElement meta, ctx
         react = React.renderToString(el)
-        expect($(react).text()).toMatch 'foo bar'
+        expect($(react).text()).toEqual 'foo bar'
 
   # _buildRepeat
   #----------------------------------------------------------------------

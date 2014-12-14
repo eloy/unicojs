@@ -15,9 +15,9 @@ class MetaElement
     if el.tagName
       @tag = el.tagName.toLowerCase()
       @attrs = @_extractAttributes(el)
+      @_runTransformations(el)
       nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
-      @_register() # Register element if needed (layouts)
     else
       # Text Node
       @text = true
@@ -28,10 +28,22 @@ class MetaElement
   # Extrac nodes from the given element
   _extractChildrens: (parent) ->
     nodes = []
-    for el in parent.childNodes
+    for el in @_getHtmlChildrens(parent)
       meta = new MetaElement(@ctx, el)
       nodes.push meta if meta._isValid()
     return nodes
+
+  # Return childrens in the given HTML element.
+  # Needed because element of type SCRIPT always return its content as
+  # text element, so we should build a DOM from that text
+  _getHtmlChildrens: (el) ->
+    return el.childNodes if el.tagName != 'SCRIPT'
+
+    # Extract a DOM from the element
+    div = document.createElement 'div'
+    div.innerHTML = el.innerHTML.toString()
+    return div.childNodes
+
 
   # Transform html attributes into a hash
   _extractAttributes: (el) ->
@@ -51,6 +63,8 @@ class MetaElement
       attrs[key] = value
 
     return attrs
+
+
 
     # Return an array with text contstants and variables interpolated
   _splitInterpolated: (content) ->
@@ -121,17 +135,16 @@ class MetaElement
     else
       @repeatExp.value = exp_1
 
-  _register: ->
+  _runTransformations: ->
     # Register template
-    if @tag == 'script' && @attrs.type="text/html"
-      return @_registerTemplate()
+    if @tag == 'script' && @attrs.type = "text/html"
+      return @_transformTemplate()
 
     if @attrs.template
       @yield = true
 
-
   # We need to store templates for later use
-  _registerTemplate: ->
+  _transformTemplate: ->
+    @attrs.hide = true
     @ctx.instance.templates ||= {}
     @ctx.instance.templates[@attrs.id] = @
-    @attrs.hide = true
