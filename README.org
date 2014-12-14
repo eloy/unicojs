@@ -1,1 +1,5 @@
 * Unico, neat js
+** Credits
+   React:
+   path-to-regexp: https://github.com/pillarjs/path-to-regexp
+   Promise: https://www.promisejs.org/
