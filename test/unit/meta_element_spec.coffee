@@ -14,6 +14,12 @@ describe 'MetaElement', ->
       expect(el.nodes[0].data).toBe 'foo'
       expect(el.nodes[0].text).toBeTruthy()
 
+    it 'should register the element if it is a template', ->
+      html = '''<script type="text/html" id="template_1">foo</script>'''
+      addFixture html
+      el = new MetaElement ctx, getFixtureElement()
+      expect(el.tag).toBe 'script'
+      expect(instance.templates['template_1']).toBeDefined()
 
   # extractChildrens
   #----------------------------------------------------------------------

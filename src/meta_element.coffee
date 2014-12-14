@@ -17,7 +17,9 @@ class MetaElement
       @attrs = @_extractAttributes(el)
       nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
+      @_register() # Register element if needed (layouts)
     else
+      # Text Node
       @text = true
       @data = el.data if el.data?.trim().length > 0
       if @data && @data.match(/{{.+}}/) != null
@@ -80,6 +82,7 @@ class MetaElement
         d.instance = new d.clazz()
         d.instance.build(ctx, @) if d.instance.build?
 
+
   # Search for directives and initialize'em at inspection time
   _attachDirectives:  ->
     return unless @attrs
@@ -117,3 +120,18 @@ class MetaElement
       @repeatExp.value = exp_2
     else
       @repeatExp.value = exp_1
+
+  _register: ->
+    # Register template
+    if @tag == 'script' && @attrs.type="text/html"
+      return @_registerTemplate()
+
+    if @attrs.template
+      @yield = true
+
+
+  # We need to store templates for later use
+  _registerTemplate: ->
+    @ctx.instance.templates ||= {}
+    @ctx.instance.templates[@attrs.id] = @
+    @attrs.hide = true

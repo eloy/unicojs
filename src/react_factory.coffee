@@ -27,13 +27,28 @@ ReactFactory =
       metaDup.reactClass = false
       return React.createElement meta.reactClass, {meta: metaDup, ctx: ctx}
 
+    # If it is a repeat element
     if meta.repeat
       content = @_buildRepeatNodes meta, ctx
-    # HTML Elements
-    else if meta.nodes?
+
+    # Template placeholder
+    else if meta.yield
+      tmpl = ctx.instance.templates[meta.attrs.template]
+      content = if tmpl then @buildNodes(tmpl.nodes, ctx) else []
+
+    # HTML Element with childrens
+    else if meta.nodes
       content =  @buildNodes meta.nodes, ctx
+
+    # Single element
     else
       content = meta.data
+
+    # Transform to div if tag is invalid
+    unless React.DOM[meta.tag]
+      meta.originalTag = meta.tag
+      meta.tag = 'div'
+      meta.attrs['data-original-tag'] = meta.originalTag
 
     # Finally, return the react element
     return React.DOM[meta.tag] meta.attrs, content

@@ -8,18 +8,26 @@ describe 'ReactFactory', ->
   describe 'buildElement', ->
     it 'should return null if meta.attrs.hide is true', ->
       ctrl = {info: 'foo'}
-      ctx = new UnicoContext ctrl
+      ctx = new UnicoContext instance, ctrl
       meta = createMeta ctx, "<button>foo</button>"
       meta.attrs.hide = true
       expect(ReactFactory.buildElement meta, ctx).toBe null
 
+    # HTML Standard element
+    #----------------------------------------------------------------------
+
     describe 'html element', ->
       it 'should return a React element', ->
         ctrl = {info: 'foo'}
-        ctx = new UnicoContext ctrl
+        ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, "<button>foo</button>"
         el = ReactFactory.buildElement meta, ctx
-        # TODO: How to test this?
+        react = React.renderToString(el)
+        expect($(react).text()).toEqual 'foo'
+        expect(react).toMatch '</button>'
+
+    # Directives
+    #----------------------------------------------------------------------
 
     describe 'element with directives', ->
       it 'should return the ReactClass', ->
@@ -30,7 +38,9 @@ describe 'ReactFactory', ->
         app.addDirective 'foo', TestDirective
         meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
         el = ReactFactory.buildElement meta, ctx
-        expect(el.props.ctx).toEqual ctx
+        react = React.renderToString(el)
+        expect($(react).text()).toEqual 'Wadus'
+
 
       it 'should duplicate meta and remove reactClass from them', ->
         app = new UnicoApp()
@@ -42,6 +52,10 @@ describe 'ReactFactory', ->
         el = ReactFactory.buildElement meta, ctx
         expect(el.props.meta.reactClass).toBe false
         expect(meta.reactClass).not.toBeDefined
+
+
+    # Text Element
+    #----------------------------------------------------------------------
 
     describe 'text element not interpolated', ->
       it 'should return a React element', ->
@@ -59,7 +73,31 @@ describe 'ReactFactory', ->
         el = ReactFactory.buildElement meta, ctx
         expect(el).toEqual ['Var is ', 'foo', ' end']
 
+    # Templates
+    #----------------------------------------------------------------------
 
+    describe 'templates', ->
+      it 'should render the template inside the placeholder', ->
+        tmpl_html = '''<script type="text/html" id="template_1">foo</script>'''
+        view_html = '''<div><span template="template_1"></span> bar</div>'''
+        app = new UnicoApp()
+        instance = {app: app}
+        ctx = new UnicoContext instance, {}
+        tmpl_meta = createMeta ctx, tmpl_html
+        view_meta = createMeta ctx, view_html
+        el = ReactFactory.buildElement view_meta, ctx
+        react = React.renderToString(el)
+        expect($(react).text()).toMatch 'foo bar'
+
+      it 'should accept templates defined inside the html', ->
+        html = '''<div><div><span template="template_1"></span> bar</div><script type="text/html" id="template_1">foo</script><div>'''
+        app = new UnicoApp()
+        instance = {app: app}
+        ctx = new UnicoContext instance, {}
+        meta = createMeta ctx, html
+        el = ReactFactory.buildElement meta, ctx
+        react = React.renderToString(el)
+        expect($(react).text()).toMatch 'foo bar'
 
   # _buildRepeat
   #----------------------------------------------------------------------
@@ -78,4 +116,6 @@ describe 'ReactFactory', ->
         ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, html
         el = ReactFactory.buildElement meta, ctx
-        # TODO: how to test this?
+        react = React.renderToString(el)
+        expect($(react).text()).toMatch 'Item is: foo'
+        expect($(react).text()).toMatch 'Item is: bar'
