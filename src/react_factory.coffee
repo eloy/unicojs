@@ -32,9 +32,17 @@ ReactFactory =
       content = @_buildRepeatNodes meta, ctx
 
     # Template placeholder
-    else if meta.yield
+    else if meta.attrs.template
       tmpl = ctx.instance.templates[meta.attrs.template]
       content = if tmpl then @buildNodes(tmpl.nodes, ctx) else []
+
+    # Content
+    # TODO: better name?
+    else if meta.attrs.content
+      if ctx.instance.contents && c = ctx.instance.contents[meta.attrs.content]
+        content = @buildNodes(c.nodes, ctx)
+      else
+        content = []
 
     # HTML Element with childrens
     else if meta.nodes

@@ -22,7 +22,7 @@ describe 'ReactFactory', ->
         ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, "<button>foo</button>"
         el = ReactFactory.buildElement meta, ctx
-        react = React.renderToString(el)
+        react = renderReact(el)
         expect($(react).text()).toEqual 'foo'
         expect(react).toMatch '</button>'
 
@@ -38,7 +38,7 @@ describe 'ReactFactory', ->
         app.addDirective 'foo', TestDirective
         meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
         el = ReactFactory.buildElement meta, ctx
-        react = React.renderToString(el)
+        react = renderReact(el)
         expect($(react).text()).toEqual 'Wadus'
 
 
@@ -86,7 +86,7 @@ describe 'ReactFactory', ->
         tmpl_meta = createMeta ctx, tmpl_html
         view_meta = createMeta ctx, view_html
         el = ReactFactory.buildElement view_meta, ctx
-        react = React.renderToString(el)
+        react = renderReact(el)
         expect($(react).text()).toEqual 'foo bar'
 
       it 'should accept templates defined inside the html', ->
@@ -96,8 +96,43 @@ describe 'ReactFactory', ->
         ctx = new UnicoContext instance, {}
         meta = createMeta ctx, html
         el = ReactFactory.buildElement meta, ctx
-        react = React.renderToString(el)
+        react = renderReact(el)
         expect($(react).text()).toEqual 'foo bar'
+
+
+    # content
+    #----------------------------------------------------------------------
+
+    describe 'content', ->
+      html = '<div content="main"></div>'
+      app = new UnicoApp()
+
+      it 'should return en empty array if instance.content is undefined', ->
+        instance = {app: app}
+        ctx = new UnicoContext instance, {}
+        meta = createMeta ctx, html
+        el = ReactFactory.buildElement meta, ctx
+        react = renderReact(el)
+        expect(react).toEqual '<div content="main"></div>'
+
+      it 'should return en empty array if this content is not defined', ->
+        instance = {app: app, contents: {}}
+        ctx = new UnicoContext instance, {}
+        meta = createMeta ctx, html
+        el = ReactFactory.buildElement meta, ctx
+        react = renderReact(el)
+        expect(react).toEqual '<div content="main"></div>'
+
+      it 'should render the content', ->
+        instance = {app: app, contents: {} }
+        ctx = new UnicoContext instance, {}
+        content = createMeta ctx, '<script type="text/html"><div id="partial">foo</div></script>'
+        instance.contents.main = content
+        meta = createMeta ctx, html
+        el = ReactFactory.buildElement meta, ctx
+        react = renderReact(el)
+        expect(react).toEqual '<div content="main"><div id="partial">foo</div></div>'
+
 
   # _buildRepeat
   #----------------------------------------------------------------------
@@ -116,6 +151,6 @@ describe 'ReactFactory', ->
         ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, html
         el = ReactFactory.buildElement meta, ctx
-        react = React.renderToString(el)
+        react = renderReact(el)
         expect($(react).text()).toMatch 'Item is: foo'
         expect($(react).text()).toMatch 'Item is: bar'

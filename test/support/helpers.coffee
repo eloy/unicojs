@@ -23,6 +23,12 @@ cleanFixture = ->
 afterEach -> cleanFixture()
 
 
+# React
+#----------------------------------------------------------------------
+
+renderReact = (reactElement) ->
+  React.renderToStaticMarkup reactElement
+
 # Factories
 #----------------------------------------------------------------------
 

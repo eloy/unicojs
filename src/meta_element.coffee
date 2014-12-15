@@ -140,9 +140,6 @@ class MetaElement
     if @tag == 'script' && @attrs.type = "text/html"
       return @_transformTemplate()
 
-    if @attrs.template
-      @yield = true
-
   # We need to store templates for later use
   _transformTemplate: ->
     @attrs.hide = true
