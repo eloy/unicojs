@@ -2,9 +2,9 @@ class SendRequest
   request = (method, url, data, callback, errorCallback) ->
     r = new XMLHttpRequest()
     r.onreadystatechange = ->
-      if r.readyState == 4
+      if r.readyState == r.DONE
         if r.status == 200
-          callback(r.response)
+          callback(r.responseText)
         else
           error = new Error('Server responded with a status of ' + r.status)
           errorCallback error

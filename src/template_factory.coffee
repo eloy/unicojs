@@ -1,7 +1,7 @@
 class TemplateFactory
-  constructor: ->
+  constructor: (@opt={}) ->
     @_layouts = {}
-    @base = ''
+    @base = @opt.base || ''
 
   addLayout: (id, meta) ->
     @_layouts[id] = {meta: meta}
@@ -17,6 +17,6 @@ class TemplateFactory
     SendRequest.get(url).then (content) =>
       html = "<script type=\"text/html\" id=\"#{id}\">\n#{content.trim()}\n</script>"
       meta = MetaElement.fromStr(ctx, html)
-      l = {html: html, meta: meta}
+      l = {html: content, meta: meta}
       @_layouts[id] = l
       return l

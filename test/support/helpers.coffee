@@ -20,8 +20,10 @@ cleanFixture = ->
 
 
 # Clean fixtures after each test
-afterEach -> cleanFixture()
-
+afterEach ->
+  cleanFixture()
+  # Unistall ajax interceptor
+  jasmine.Ajax.uninstall();
 
 # React
 #----------------------------------------------------------------------

@@ -30,3 +30,20 @@ describe 'TemplateFactory', ->
         expect(layout.html).toMatch 'Template 1'
         expect(layout.meta.tag).toEqual 'script'
         expect(layout.meta.attrs.id).toEqual 'template_1.html'
+
+
+    describe 'stub', ->
+      layout = undefined
+      html = '<div>foo</div>'
+
+      beforeEach (done) ->
+        ctx = createCtx()
+        jasmine.Ajax.install()
+        jasmine.Ajax.stubRequest('/foo').andReturn responseText: html, status: 200
+        f = new TemplateFactory()
+        f.loadTemplate(ctx, '/foo').done (t) ->
+          layout = t.html
+          done()
+
+      it 'should return a resolved promise', ->
+        expect(layout).toEqual html

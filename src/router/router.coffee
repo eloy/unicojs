@@ -2,7 +2,6 @@ class HistoryDriver
   get: ->
     location.pathname
 
-
   set: (url, scope, title) ->
     history.pushState(scope, title, url);
     @listener(@get())
@@ -14,27 +13,36 @@ class UnicoRouter
   constructor: ->
     @root = new Route null, '/'
     @driver = new HistoryDriver()
+    @_routeChangedListeners = []
     @currentPath = undefined
+    return true
 
   # Add listener and find current route
   start: ->
+    # Add listener
     @driver.addEventListener (path) =>
-      @routeChanged(path)
-    @routeChanged @driver.get()
+      @_routeChanged(path)
+
+    # Send Event with current route
+    @_routeChanged @driver.get()
 
   visit: (target) ->
     @driver.set target
 
-  routeChanged: (path) ->
-    @currentPath = path
-    route = @find(path)
-    console.log route
-
   route: (path, opt={}) ->
     @root.route path, opt
 
-  root: (opt) ->
+  rootOptions: (opt) ->
     @root.setFromOptions opt
 
   find: (path) ->
     @root.find path
+
+  addRouteChangedListener: (listener) ->
+    @_routeChangedListeners.push listener
+
+  _routeChanged: (path) ->
+    @currentPath = path
+    route = @find(path)
+    for listener in @_routeChangedListeners
+      listener(route, path)
