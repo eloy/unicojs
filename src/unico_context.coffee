@@ -1,9 +1,15 @@
 class UnicoContext
-  constructor: (@instance, @ctrl, @scope={}) ->
+  constructor: (@instance, ctrlNameOrInstance, @scope={}) ->
     @app = @instance.app
+    @ctrl = @_createOrInstantiateController(ctrlNameOrInstance)
     @_watchExpressions = {}
     @_changeListeners = []
     @_childsScopes = []
+
+  _createOrInstantiateController: (ctrlNameOrInstance) ->
+    return ctrlNameOrInstance unless typeof(ctrlNameOrInstance) == 'string'
+    clazz = @app.controllers[ctrlNameOrInstance]
+    ctrl = new clazz(@)
 
 
   # Return a new evalutor with a copy of this, plus the given scope.
@@ -32,7 +38,9 @@ class UnicoContext
       value = func.apply(@ctrl, p.values)
       return value
     catch error
-      console.error(error.stack) if @app.debug
+      if @app.debug
+        console.error "Exception evaluating: #{expression}"
+        console.error(error.stack)
       return null
 
 

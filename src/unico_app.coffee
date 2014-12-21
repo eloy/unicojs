@@ -20,8 +20,12 @@ class UnicoApp
     @directives[name] = clazz
 
   refresh: ->
-    for instance in @instances
-      instance.changed()
+    if @instances
+      i.changed() for i in @instances
+    else if @reactRender
+      console.log "r"
+      @reactRender.setProps()
+
     true
 
   # One Time Render
@@ -31,10 +35,10 @@ class UnicoApp
     @instances = []
     # Search for controllers
     for el in document.querySelectorAll("[controller]")
-      name = el.getAttribute 'controller'
-      clazz = @controllers[name]
-      ctrl = new clazz()
-      @instances.push new UnicoInstance @, ctrl, el
+      controllerName = el.getAttribute 'controller'
+      instance = new UnicoInstance @, controllerName
+      instance.build(el)
+      @instances.push instance
     return @
 
 
@@ -52,31 +56,14 @@ class UnicoApp
 
   _loadRoute: (request, path) ->
     try
-      ctrlName = request.route.controller
-      ctrl = new @controllers[ctrlName]()
-      instance = {app: @, contents: {} }
-      ctx = new UnicoContext instance, ctrl
       body = document.querySelector @opt.targetElement
+      ctrlName = request.route.controller
+      instance = new UnicoInstance @, ctrlName
+      @instances = [instance]
+      instance.buildRoute request, path, body
 
-      partialPromise = @tmplFactory.loadTemplate ctx, request.route.layout
-      layoutPromise = @tmplFactory.loadTemplate ctx, '/layouts/application.html'
-
-      task = Promise.all [partialPromise, layoutPromise]
-      task.then (r) =>
-        partial = r[0]
-        layout = r[1]
-        instance.contents.main = partial.meta
-
-        targetMeta = new MetaElement ctx, document.createElement('body')
-        targetMeta.nodes = layout.meta.nodes
-        reactClass = ReactFactory.buildClass targetMeta, ctx
-
-        reactElement = React.createElement(reactClass)
-        # Unmount current page
-        reactRender = React.render reactElement, body, (=> @_onMounted() )
-
-    catch err
-      console.log error
+    catch error
+      console.error(error.stack) if @debug
       return false
 
   _createRouter: ->
