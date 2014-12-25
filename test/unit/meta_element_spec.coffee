@@ -116,7 +116,21 @@ describe 'MetaElement', ->
       foo = {}
       app.addDirective 'foo', foo
       meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
-      expect(meta.reactClass).toBeTruthy()
+      expect(meta.reactClass).toBeDefined()
+
+
+  describe 'attachComponent', ->
+    it 'should extract build this.component', ->
+      class TestComponent
+        @template: '<div id="foo">FOO</div>'
+      html = '<test id="bar"></test>'
+      ctx = createCtx()
+      app = ctx.app
+      app.addComponent 'test', TestComponent
+      meta = createMeta ctx, html
+      expect(meta.component).toBeDefined()
+      expect(meta.reactClass).toBeDefined()
+
 
   # prepareIgnition
   #----------------------------------------------------------------------

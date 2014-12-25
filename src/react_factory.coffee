@@ -36,13 +36,24 @@ ReactFactory =
       tmpl = ctx.instance.templates[meta.attrs.template]
       content = if tmpl then @buildNodes(tmpl.nodes, ctx) else []
 
-    # Content
+    # Content. Content is used as placeholders in layouts. In the
+    # application layout you add elements with the attribute content
+    # and in the UnicoInstance, you can set meta into the contents
+    # object with using as key the name used in the attrute content
     # TODO: better name?
     else if meta.attrs.content
       if ctx.instance.contents && c = ctx.instance.contents[meta.attrs.content]
         content = @buildNodes(c.nodes, ctx)
       else
         content = []
+
+    # Component
+    else if meta.component
+      childCtx = ctx.child meta.component.directive.instance
+      if meta.component.template
+        content = @buildElement meta.component.template, childCtx
+      else if meta.nodes
+        content = @buildNodes meta.nodes, childCtx
 
     # HTML Element with childrens
     else if meta.nodes

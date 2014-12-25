@@ -7,6 +7,7 @@ class UnicoApp
   constructor: (@opt={})->
     @controllers = {}
     @directives = UnicoApp.builtInDirectives
+    @components = {}
     @_mountedCallbacks = []
 
     if @opt.enableRouter
@@ -18,6 +19,9 @@ class UnicoApp
 
   addDirective: (name, clazz) ->
     @directives[name] = clazz
+
+  addComponent: (name, clazz) ->
+    @components[name] = clazz
 
   refresh: ->
     if @instances

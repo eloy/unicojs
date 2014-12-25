@@ -54,13 +54,56 @@ describe 'ReactFactory', ->
         expect(meta.reactClass).not.toBeDefined
 
 
+    # Component
+    #----------------------------------------------------------------------
+    it 'should insert template if present', ->
+      class TestComponent
+        @template: '<div id="foo">FOO</div>'
+
+      html = '<test id="bar"></test>'
+      ctx = createCtx()
+      app = ctx.app
+      app.addComponent 'test', TestComponent
+      meta = createMeta ctx, html
+      page = renderMeta meta, ctx
+      expect(page).toEqual '<div id="bar"><div id="foo">FOO</div></div>'
+
+
+    it 'should replace the element for the one defined in the component', ->
+      class TestComponent
+        @template: '<div id="foo">FOO</div>'
+        @element: 'form'
+
+      html = '<test id="bar"></test>'
+      ctx = createCtx()
+      app = ctx.app
+      app.addComponent 'test', TestComponent
+      meta = createMeta ctx, html
+      page = renderMeta meta, ctx
+      expect(page).toEqual '<form id="bar"><div id="foo">FOO</div></form>'
+
+
+    it 'should add the directive to the scope', ->
+      class TestComponent
+        @template: '<div id="foo">{{bar}}</div>'
+        bar: 'FOO'
+
+      html = '<test id="bar"></test>'
+      ctx = createCtx()
+      app = ctx.app
+      app.addComponent 'test', TestComponent
+      meta = createMeta ctx, html
+      page = renderMeta meta, ctx
+      expect(page).toEqual '<div id="bar"><div id="foo">FOO</div></div>'
+
+
     # Text Element
     #----------------------------------------------------------------------
 
     describe 'text element not interpolated', ->
       it 'should return a React element', ->
         ctrl = {info: 'foo'}
-        ctx = new UnicoContext ctrl
+        ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, "Foo"
         el = ReactFactory.buildElement meta, ctx
         expect(el).toEqual 'Foo'
@@ -68,7 +111,7 @@ describe 'ReactFactory', ->
     describe 'text element interpolated', ->
       it 'should return a React element', ->
         ctrl = {info: 'foo'}
-        ctx = new UnicoContext app, ctrl
+        ctx = new UnicoContext instance, ctrl
         meta = createMeta ctx, "Var is {{info}} end"
         el = ReactFactory.buildElement meta, ctx
         expect(el).toEqual ['Var is ', 'foo', ' end']

@@ -2,7 +2,9 @@ class MetaElement
   constructor: (@ctx, el) ->
     @_extractMeta el
     @_denormalizeRepeat()
+    @_attachComponent()
     @_attachDirectives()
+    @_createClass()
 
   @fromStr: (ctx, html) ->
     el = document.createElement 'div'
@@ -96,8 +98,7 @@ class MetaElement
         d.instance = new d.clazz()
         d.instance.build(ctx, @) if d.instance.build?
 
-
-  # Search for directives and initialize'em at inspection time
+  # Search for directives and create class at inspection time
   _attachDirectives:  ->
     return unless @attrs
     for key, value of @attrs
@@ -105,8 +106,29 @@ class MetaElement
         @directives ||= []
         @directives.push { clazz: @ctx.app.directives[key] }
 
-    return unless @directives?
 
+  _attachComponent: ->
+    return unless clazz = @ctx.app.components[@tag]
+    @component = { clazz: clazz }
+    if clazz.template?
+      clazz.__template_meta ||= MetaElement.fromStr @ctx, clazz.template
+      # Build template
+      @component.template = clazz.__template_meta
+
+    # Replace the element tag name
+    if clazz.element
+      @tag = clazz.element
+    else
+      @tag = 'div'
+
+    # Add directive
+    @component.directive = { clazz: clazz }
+    @directives ||= []
+    @directives.push @component.directive
+
+
+  _createClass: ->
+    return unless @directives?
     # Create reactClass
     renderCallback = -> ReactFactory.buildElement @props.meta, @props.ctx
     mountedCallback = ->
