@@ -14,7 +14,7 @@ class UnicoContext
 
   # Return a new evalutor with a copy of this, plus the given scope.
   # Used for each loops
-  child: (scope, opt={}) ->
+  child: (scope={}, opt={}) ->
     # Build a childController with the content of this controller
     # including parent context and parent of parent context
     newScope = Object.create(@scope)
@@ -82,7 +82,7 @@ class UnicoContext
     return value
 
 
-  # A change event is emited automaticaly on diges when some value
+  # A change event is emited automaticaly on digest when some value
   # change, or manually calling @changed()
   addChangeListener: (callback) ->
     @_changeListeners.push callback

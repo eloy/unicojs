@@ -1,5 +1,5 @@
 class UnicoInstance
-  constructor: (@app, ctrlNameOrInstance) ->
+  constructor: (@app, ctrlNameOrInstance, @reactRender) ->
     @ctx = new UnicoContext(@, ctrlNameOrInstance)
     @ctx.addChangeListener => @refresh()
     @contents = {}
@@ -14,7 +14,7 @@ class UnicoInstance
     @reactRender = React.render @reactElement, @el
 
 
-  buildRoute: (request, path, body) ->
+  buildRoute: (request, path) ->
     partialPromise = @app.tmplFactory.loadTemplate @ctx, request.route.layout
     layoutPromise = @app.tmplFactory.loadTemplate @ctx, '/layouts/application.html'
 
@@ -24,17 +24,14 @@ class UnicoInstance
       layout = r[1]
       @contents.main = partial.meta
 
-      targetMeta = new MetaElement @ctx, document.createElement('body')
+      targetMeta = new MetaElement @ctx, document.createElement('div')
       targetMeta.nodes = layout.meta.nodes
-      reactClass = ReactFactory.buildClass targetMeta, @ctx
-
-      reactElement = React.createElement(reactClass)
-      # Unmount current page
-      @reactRender = React.render reactElement, body, (=> @app._onMounted() )
-
+      @routeMeta = targetMeta
+      @refresh()
 
   refresh: ->
-    @reactRender.setProps()
+    return false unless @reactRender
+    @reactRender.setProps meta: @routeMeta, ctx: @ctx, (=> @app._onMounted() )
     return true
 
   digest: ->

@@ -31,6 +31,10 @@ afterEach ->
 renderReact = (reactElement) ->
   React.renderToStaticMarkup reactElement
 
+renderMeta = (meta, ctx) ->
+  el = ReactFactory.buildElement meta, ctx
+  renderReact el
+
 # Factories
 #----------------------------------------------------------------------
 

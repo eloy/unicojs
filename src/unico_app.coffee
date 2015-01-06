@@ -7,6 +7,7 @@ class UnicoApp
   constructor: (@opt={})->
     @controllers = {}
     @directives = UnicoApp.builtInDirectives
+    @components = {}
     @_mountedCallbacks = []
 
     if @opt.enableRouter
@@ -19,12 +20,12 @@ class UnicoApp
   addDirective: (name, clazz) ->
     @directives[name] = clazz
 
+  addComponent: (name, clazz) ->
+    @components[name] = clazz
+
   refresh: ->
     if @instances
       i.changed() for i in @instances
-    else if @reactRender
-      console.log "r"
-      @reactRender.setProps()
 
     true
 
@@ -45,10 +46,21 @@ class UnicoApp
   # Router
   #----------------------------------------------------------------------
 
+  buildRender: ->
+    body = document.querySelector @opt.targetElement
+    reactClass = React.createClass render: ->
+      return React.DOM.div( {}, []) unless @props.meta && @props.ctx
+      ReactFactory.buildElement @props.meta, @props.ctx
+
+    reactElement = React.createElement(reactClass, {meta: false, ctx: false})
+    @reactRender = React.render reactElement, body
+
+
   visit: (path) ->
     @router.visit path
 
   startRouter: ->
+    @buildRender()
     @router.start()
 
   addMountListener: (listener) ->
@@ -56,11 +68,10 @@ class UnicoApp
 
   _loadRoute: (request, path) ->
     try
-      body = document.querySelector @opt.targetElement
       ctrlName = request.route.controller
-      instance = new UnicoInstance @, ctrlName
+      instance = new UnicoInstance @, ctrlName, @reactRender
       @instances = [instance]
-      instance.buildRoute request, path, body
+      instance.buildRoute request, path
 
     catch error
       console.error(error.stack) if @debug
