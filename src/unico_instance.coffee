@@ -34,6 +34,7 @@ class UnicoInstance
 
 
   refresh: ->
+    return false unless @reactRender
     @reactRender.setProps()
     return true
 
