@@ -133,10 +133,15 @@ class MetaElement
     renderCallback = -> ReactFactory.buildElement @props.meta, @props.ctx
     mountedCallback = ->
       for d in @props.meta.directives
-        if d.instance?.link
+        if d.instance.link
           d.instance.link @props.ctx, @getDOMNode(), @props.meta
 
-    @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback
+    receiveProps = ->
+      for d in @props.meta.directives
+        if d.instance.onRefresh
+          d.instance.onRefresh @props.ctx, @getDOMNode(), @props.meta
+
+    @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback, componentWillReceiveProps: receiveProps
 
 
   # Denormalize expression from collection in form
