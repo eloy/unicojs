@@ -16,7 +16,7 @@ class MetaElement
   _extractMeta: (el) ->
     if el.tagName
       @tag = el.tagName.toLowerCase()
-      @attrs = @_extractAttributes(el)
+      @_extractAttributes(el)
       @_runTransformations(el)
       nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
@@ -49,9 +49,10 @@ class MetaElement
 
   # Transform html attributes into a hash
   _extractAttributes: (el) ->
-    attrs = {}
+    @attrs = {}
     # Return an empty hash if element has no attributes
-    return attrs unless el.attributes and el.attributes.length > 0
+    return false unless el.attributes and el.attributes.length > 0
+    varRegexp = /{{.+}}/
 
     length = el.attributes.length - 1
     for i in [0..length]
@@ -62,10 +63,11 @@ class MetaElement
       key = "className" if key == "class"
 
       # Assign the value
-      attrs[key] = value
+      if varRegexp.test(value)
+        @attrsInterpolated ||= {}
+        @attrsInterpolated[key] = value
 
-    return attrs
-
+      @attrs[key] = value
 
 
     # Return an array with text contstants and variables interpolated
@@ -97,6 +99,9 @@ class MetaElement
       for d in @directives
         d.instance = new d.clazz()
         d.instance.build(ctx, @) if d.instance.build?
+    if @attrsInterpolated
+      for name, exp of @attrsInterpolated
+        @attrs[name] = ctx.interpolate(exp)
 
   # Search for directives and create class at inspection time
   _attachDirectives:  ->

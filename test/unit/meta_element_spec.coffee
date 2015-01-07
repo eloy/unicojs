@@ -40,11 +40,19 @@ describe 'MetaElement', ->
   #----------------------------------------------------------------------
 
   describe '_extractAttributes', ->
-    it 'should read attributes from element and return a hash', ->
+    it 'should read attributes from element and store it in @attrs', ->
       html = '''<div id="foo" if="view() > 0" data-bar="wadus" directive>blah blah</div>'''
       addFixture html
       el = new MetaElement ctx, getFixtureElement()
       expect(el.attrs).toEqual {id: 'foo', if: 'view() > 0', "data-bar": 'wadus', directive: ''}
+      expect(el.attrsInterpolated).toBeUndefined()
+
+    it 'should read attributes with variables from element and store them in @attrsInterpolated', ->
+      html = '''<div id="{{foo}}">blah blah</div>'''
+      addFixture html
+      el = new MetaElement ctx, getFixtureElement()
+      expect(el.attrs).toEqual id: "{{foo}}"
+      expect(el.attrsInterpolated).toEqual id: "{{foo}}"
 
     it 'should replace class with className', ->
       html = '''<div class="foo">blah blah</div>'''
@@ -151,3 +159,17 @@ describe 'MetaElement', ->
       meta.prepareIgnition(ctx)
       directive = meta.directives[0].instance
       expect(directive.built).toBeTruthy()
+
+
+    it 'should fill interpolated attributes', ->
+      class Test
+        foo: "BAR"
+
+      app = new UnicoApp()
+      app.addController 'test', Test
+      instance = {app: app}
+      ctx = new UnicoContext instance, 'test'
+      meta = createMeta ctx, '''<div foo="{{foo}}" bar="{{bar}}">Wadus</div>'''
+      meta.prepareIgnition(ctx)
+      expect(meta.attrs.foo).toBe 'BAR'
+      expect(meta.attrs.bar).toBe ''

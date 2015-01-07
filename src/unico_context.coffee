@@ -48,8 +48,7 @@ class UnicoContext
   # Search and replace expressions in the given text
   interpolate: (html) ->
     html.replace /{{([\s\w\d\[\]_\(\)\.\$"']+)}}/g, (match, capture) =>
-      @eval capture
-
+      @eval(capture) || ''
 
   # Extract elements in the context and store it in arrays for keys and values
   _extractParams: ->
