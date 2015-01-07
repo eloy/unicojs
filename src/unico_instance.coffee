@@ -1,10 +1,8 @@
 class UnicoInstance
-  constructor: (@app, ctrlNameOrInstance, @reactRender) ->
+  constructor: (@app, ctrlNameOrInstance, @reactRender, @params={}) ->
     @ctx = new UnicoContext(@, ctrlNameOrInstance)
     @ctx.addChangeListener => @refresh()
     @contents = {}
-
-
 
     # Extract meta from the element
   build: (@el) ->

@@ -1,6 +1,7 @@
 class UnicoContext
   constructor: (@instance, ctrlNameOrInstance, @scope={}) ->
     @app = @instance.app
+    @params = @instance.params
     @ctrl = @_createOrInstantiateController(ctrlNameOrInstance)
     @_watchExpressions = {}
     @_changeListeners = []

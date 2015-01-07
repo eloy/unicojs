@@ -69,7 +69,7 @@ class UnicoApp
   _loadRoute: (request, path) ->
     try
       ctrlName = request.route.controller
-      instance = new UnicoInstance @, ctrlName, @reactRender
+      instance = new UnicoInstance @, ctrlName, @reactRender, request.params
       @instances = [instance]
       instance.buildRoute request, path
 
