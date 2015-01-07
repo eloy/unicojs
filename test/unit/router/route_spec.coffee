@@ -33,3 +33,58 @@ describe 'Route', ->
       expect(last.path).toEqual '/users/new'
       expect(last.controller).toEqual 'new_controller'
       expect(last.layout).toEqual '/new.html'
+
+  describe 'resorces', ->
+    it 'should add resources', ->
+      root = new Route(false, '/')
+      root.resources 'users'
+
+      r = root.find('/users').route
+      expect(r.path).toEqual '/users'
+      expect(r.controller).toEqual 'users#index'
+      expect(r.layout).toEqual '/users/index'
+
+      r = root.find('/users/new').route
+      expect(r.path).toEqual '/users/new'
+      expect(r.controller).toEqual 'users#new'
+      expect(r.layout).toEqual '/users/new'
+
+      r = root.find('/users/1').route
+      expect(r.path).toEqual '/users/:id'
+      expect(r.controller).toEqual 'users#show'
+      expect(r.layout).toEqual '/users/show'
+
+
+      r = root.find('/users/1/edit').route
+      expect(r.path).toEqual '/users/:id/edit'
+      expect(r.controller).toEqual 'users#edit'
+      expect(r.layout).toEqual '/users/edit'
+
+    describe 'parameter namespace', ->
+      it 'should add the namespace to the route and his childrens', ->
+
+        root = new Route(false, '/')
+        root.route '/admin', namespace: 'admin', controller: 'admin_controller#index', layout: '/admin/index', (admin) ->
+          admin.resources 'users'
+
+        # Admin routes
+        r = root._routes[0]._routes
+        r = root.find('/admin/users').route
+        expect(r.path).toEqual '/admin/users'
+        expect(r.controller).toEqual 'admin_users#index'
+        expect(r.layout).toEqual '/admin/users/index'
+
+        r = root.find('/admin/users/new').route
+        expect(r.path).toEqual '/admin/users/new'
+        expect(r.controller).toEqual 'admin_users#new'
+        expect(r.layout).toEqual '/admin/users/new'
+
+        r = root.find('/admin/users/1').route
+        expect(r.path).toEqual '/admin/users/:id'
+        expect(r.controller).toEqual 'admin_users#show'
+        expect(r.layout).toEqual '/admin/users/show'
+
+        r = root.find('/admin/users/1/edit').route
+        expect(r.path).toEqual '/admin/users/:id/edit'
+        expect(r.controller).toEqual 'admin_users#edit'
+        expect(r.layout).toEqual '/admin/users/edit'

@@ -44,9 +44,11 @@ class UnicoRouter
   visit: (target) ->
     @driver.set target
 
-  route: (path, opt={}) ->
-    @root.route path, opt
+  route: (path, opt={}, childrensCallback) ->
+    @root.route path, opt, childrensCallback
 
+  resources: (name, opt={}, childrensCallback) ->
+    @root.resources(name, opt, childrensCallback)
   rootOptions: (opt) ->
     @root.setFromOptions opt
 
