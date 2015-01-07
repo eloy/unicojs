@@ -13,9 +13,10 @@ class Route
     @controller = opt.controller
     @layout = opt.layout
 
-  route: (path, opt={}) ->
+  route: (path, opt={}, childrensCallback) ->
     r = new Route @, path, opt
     @_routes.push r
+    childrensCallback(r) if childrensCallback
     return r
 
   find: (path) ->
