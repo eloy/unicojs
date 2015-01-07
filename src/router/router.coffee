@@ -9,10 +9,25 @@ class HistoryDriver
   addEventListener: (@listener) ->
     window.onpopstate = (=> @listener(@get()))
 
+
+class HashDriver
+  get: ->
+    location.hash.substr(1)
+
+  set: (url, scope, title) ->
+    location.hash = "##{url}"
+
+  addEventListener: (@listener) ->
+    window.onpopstate = (=> @listener(@get()))
+
 class UnicoRouter
-  constructor: ->
+  constructor: (opt={}) ->
     @root = new Route null, '/'
-    @driver = new HistoryDriver()
+    # Initialize the driver, hash by default
+    if opt.type == 'history'
+      @driver = new HistoryDriver()
+    else
+      @driver = new HashDriver()
     @_routeChangedListeners = []
     @currentPath = undefined
     return true

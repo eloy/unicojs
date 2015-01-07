@@ -78,7 +78,7 @@ class UnicoApp
       return false
 
   _createRouter: ->
-    router = new UnicoRouter()
+    router = new UnicoRouter({type: @opt.routerType})
     router.addRouteChangedListener (request, path) =>
       @_loadRoute(request, path)
     @opt.targetElement ||= "body"

@@ -17,34 +17,70 @@ describe 'UnicoApp', ->
       expect(el.text().trim()).toEqual 'FOO'
 
   describe 'startRouter', ->
-    layoutHtml = '<div id="layout">Content is: <div content="main"></div></div>'
-    fooHtml = '<div id="fooContent">{{foo}}</div>'
-    barHtml = '<div id="barContent">{{bar}}</div>'
-    callback = undefined
-    app = new UnicoApp(enableRouter: true, targetElement: '#reactTarget')
+    describe 'hash router', ->
+      layoutHtml = '<div id="layout">Content is: <div content="main"></div></div>'
+      fooHtml = '<div id="fooContent">{{foo}}</div>'
+      barHtml = '<div id="barContent">{{bar}}</div>'
+      callback = undefined
+      app = new UnicoApp(enableRouter: true, targetElement: '#reactTarget')
 
-    class TestController
-      foo: 'FOO'
-      bar: 'BAR'
+      class TestController
+        foo: 'FOO'
+        bar: 'BAR'
 
-    beforeEach (done) ->
-      jasmine.Ajax.install();
-      jasmine.Ajax.stubRequest('/layouts/application.html').andReturn responseText: layoutHtml, status: 200
-      jasmine.Ajax.stubRequest('/home/foo').andReturn responseText: fooHtml, status: 200
-      jasmine.Ajax.stubRequest('/home/bar').andReturn responseText: barHtml, status: 200
+      beforeEach (done) ->
+        jasmine.Ajax.install();
+        jasmine.Ajax.stubRequest('/layouts/application.html').andReturn responseText: layoutHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/foo').andReturn responseText: fooHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/bar').andReturn responseText: barHtml, status: 200
 
-      addFixture '<div id="reactTarget"></div>'
-      callback = done
-      app.addMountListener (() -> callback())
-      app.addController 'test_controller', TestController
-      app.router.rootOptions layout: '/home/foo', controller: 'test_controller'
-      app.router.route '/bar', layout: '/home/bar', controller: 'test_controller'
-      app.startRouter()
+        addFixture '<div id="reactTarget"></div>'
+        callback = done
+        app.addMountListener (() -> callback())
+        app.addController 'test_controller', TestController
+        app.router.rootOptions layout: '/home/foo', controller: 'test_controller'
+        app.router.route '/bar', layout: '/home/bar', controller: 'test_controller'
+        app.startRouter()
 
-    it 'should render differente layouts based on the path', (done) ->
-      expect($("#reactTarget").text()).toEqual 'Content is: FOO'
-      callback = done
-      app.visit '/bar'
+      it 'should render differente layouts based on the path', (done) ->
+        expect(app.router.driver.constructor.name).toEqual 'HashDriver'
+        expect($("#reactTarget").text()).toEqual 'Content is: FOO'
+        callback = done
+        app.visit '/bar'
 
-    afterEach ->
-      expect($("#reactTarget").text()).toEqual 'Content is: BAR'
+      afterEach ->
+        expect($("#reactTarget").text()).toEqual 'Content is: BAR'
+
+  describe 'history router', ->
+      layoutHtml = '<div id="layout">Content is: <div content="main"></div></div>'
+      fooHtml = '<div id="fooContent">{{foo}}</div>'
+      barHtml = '<div id="barContent">{{bar}}</div>'
+      callback = undefined
+      app = new UnicoApp(enableRouter: true, routerType: 'history', targetElement: '#reactTarget')
+
+      class TestController
+        foo: 'FOO'
+        bar: 'BAR'
+
+      beforeEach (done) ->
+        jasmine.Ajax.install();
+        jasmine.Ajax.stubRequest('/layouts/application.html').andReturn responseText: layoutHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/foo').andReturn responseText: fooHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/bar').andReturn responseText: barHtml, status: 200
+
+        addFixture '<div id="reactTarget"></div>'
+        callback = done
+        app.addMountListener (() -> callback())
+        app.addController 'test_controller', TestController
+        app.router.rootOptions layout: '/home/foo', controller: 'test_controller'
+        app.router.route '/bar', layout: '/home/bar', controller: 'test_controller'
+        app.startRouter()
+
+      it 'should render differente layouts based on the path', (done) ->
+        expect(app.router.driver.constructor.name).toEqual 'HistoryDriver'
+        expect($("#reactTarget").text()).toEqual 'Content is: FOO'
+        callback = done
+        app.visit '/bar'
+
+      afterEach ->
+        expect($("#reactTarget").text()).toEqual 'Content is: BAR'
