@@ -28,9 +28,9 @@ class Route
     layoutPrefix += "#{name}".replace("//", "/")
     ctrlPrefix = layoutPrefix.replace("/", "_")
 
-    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", layout: "/#{layoutPrefix}/index"
+    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", layout: "/#{layoutPrefix}/index", namespace: @namespace
     index.route "/new", controller: "#{ctrlPrefix}#new", layout: "/#{layoutPrefix}/new"
-    show = index.route "/:id", controller: "#{ctrlPrefix}#show", layout: "/#{layoutPrefix}/show"
+    show = index.route "/:id", controller: "#{ctrlPrefix}#show", layout: "/#{layoutPrefix}/show", namespace: @namespace
     show.route "/edit", controller: "#{ctrlPrefix}#edit", layout: "/#{layoutPrefix}/edit"
 
     @_routes.push(index)
