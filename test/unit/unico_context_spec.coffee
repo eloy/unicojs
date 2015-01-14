@@ -10,6 +10,15 @@ describe "UnicoContext", ->
       ctx = new UnicoContext instance, {}
       expect(ctx.eval("test()")).toBeUndefined
 
+    describe 'inline', ->
+      it 'should eval the given function', ->
+        ctrl = {test: true }
+        ctx = new UnicoContext instance, ctrl
+        exp = "test ? 'foo' : 'bar'"
+        expect(ctx.eval(exp)).toEqual 'foo'
+        ctrl.test = false
+        expect(ctx.eval(exp)).toEqual 'bar'
+
     describe 'functions', ->
       it 'should eval the given function', ->
         ctrl = {test: -> 'foo'}

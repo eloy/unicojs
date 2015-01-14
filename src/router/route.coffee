@@ -1,12 +1,20 @@
 class Route
-  constructor: (parent, path, opt={}) ->
+  constructor: (@parent, path, opt={}) ->
     @_routes = []
     @setFromOptions opt
-    @prepareRegExp(parent, path) if path
+
+    # Route options
+    @resourceName = opt.resource
+    @isResourceMember = opt.resourceMember
+
+    if path
+      @buildPath(path)
+      @prepareRegExp(parent, @path)
+
+
     @namespace = opt.namespace
 
   prepareRegExp: (parent, path) ->
-    @path = @_fullPath(parent, path)
     @keys = []
     @regexp = pathtoRegexp(@path, @keys, end: false)
 
@@ -30,8 +38,9 @@ class Route
 
     index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", layout: "/#{layoutPrefix}/index", namespace: @namespace
     index.route "/new", controller: "#{ctrlPrefix}#new", layout: "/#{layoutPrefix}/new"
-    show = index.route "/:id", controller: "#{ctrlPrefix}#show", layout: "/#{layoutPrefix}/show", namespace: @namespace
-    show.route "/edit", controller: "#{ctrlPrefix}#edit", layout: "/#{layoutPrefix}/edit"
+
+    show = index.route "/:id", controller: "#{ctrlPrefix}#show", layout: "/#{layoutPrefix}/show", namespace: @namespace, resource: name
+    show.route "/edit", controller: "#{ctrlPrefix}#edit", layout: "/#{layoutPrefix}/edit", resourceMember: true
 
     @_routes.push(index)
     # Add childrens from callbacks.
@@ -62,7 +71,17 @@ class Route
     routes.push r.toHash() for r in @_routes
     {path: @path, controller: @controller, layout: @layout, routes: routes }
 
-  _fullPath: (parent, path) ->
-    str = if parent then parent.path else ''
-    str += "/#{path}"
-    return str.replace /\/+/g, "/"
+  buildPath: (path) ->
+    base = ''
+    if @parent
+      if @parent.resourcePath && !@isResourceMember
+        base += @parent.resourcePath
+      else
+        base += @parent.path
+
+    str = "#{base}/#{path}"
+
+    @path =  str.replace /\/+/g, "/"
+    if @resourceName
+      resource_name = @resourceName.singularize()
+      @resourcePath = "#{base}/:#{resource_name}_id".replace /\/+/g, "/"

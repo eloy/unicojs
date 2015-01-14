@@ -65,7 +65,8 @@ describe 'Route', ->
 
         root = new Route(false, '/')
         root.route '/admin', namespace: 'admin', controller: 'admin_controller#index', layout: '/admin/index', (admin) ->
-          admin.resources 'users'
+          admin.resources 'users', {}, (member, collection) ->
+            member.resources 'posts'
 
         # Admin routes
         r = root._routes[0]._routes
@@ -88,3 +89,9 @@ describe 'Route', ->
         expect(r.path).toEqual '/admin/users/:id/edit'
         expect(r.controller).toEqual 'admin_users#edit'
         expect(r.layout).toEqual '/admin/users/edit'
+
+
+        r = root.find('/admin/users/1/posts/2/edit').route
+        expect(r.path).toEqual '/admin/users/:user_id/posts/:id/edit'
+        expect(r.controller).toEqual 'admin_posts#edit'
+        expect(r.layout).toEqual '/admin/posts/edit'
