@@ -44,6 +44,24 @@ class UnicoContext
         console.error(error.stack)
       return null
 
+  # TODO: Test
+  set: (target, v) ->
+    value = v
+    value = "'#{value}'" unless typeof(n) == "number"
+    exp = "#{target} = #{value}"
+    @eval exp
+
+    # UGLY HACK
+    # Sometimes when updating values from the controller we need
+    # to append the this prefix. That doesn't happens with values
+    # in the scope, need to figure out. So the solution is ask for
+    # the value after set without the prefix. If the value doesn't
+    # change, then try again with the prefix
+
+    if @eval(target) != v
+      exp = "this.#{target} = #{value}"
+      @eval exp
+
 
   # Search and replace expressions in the given text
   interpolate: (html) ->
