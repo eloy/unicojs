@@ -1,28 +1,40 @@
 class ModelDirective
   build: (ctx, meta) ->
+    if meta.tag == "input" && meta.attrs.type == "radio"
+      @radio = true
+      @attachRadioButton(ctx, meta)
+    else
+      @attachValueLink(ctx, meta)
+
+  attachValueLink: (ctx, meta) ->
     meta.attrs.valueLink = {
       value: ctx.eval(meta.attrs.model)
-      requestChange: (v) ->
-        value = v
-        value = "'#{value}'" unless typeof(n) == "number"
-        exp = "#{meta.attrs.model} = #{value}"
-        ctx.eval exp
 
-        # UGLY HACK
-        # Sometimes when updating values from the controller we need
-        # to append the this prefix. That doesn't happens with values
-        # in the scope, need to figure out. So the solution is ask for
-        # the value after set without the prefix. If the value doesn't
-        # change, then try again with the prefix
-
-        if ctx.eval(meta.attrs.model) != v
-          exp = "this.#{meta.attrs.model} = #{value}"
-          ctx.eval exp
-
+      requestChange: (value) ->
+        ctx.set meta.attrs.model, value
         ctx.instance.changed()
         return true
     }
 
 
-UnicoApp.builtInDirectives ||= {}
+  # http://stackoverflow.com/a/25413172/1454862
+  attachRadioButton: (ctx, meta) ->
+    # Name attribute is mandatory
+    meta.attrs.name ||= meta.attrs.model
+
+    meta.attrs.onChange = (ev) ->
+      input = ev.currentTarget
+      valueSrc = input.getAttribute 'value'
+      value = ctx.interpolate valueSrc
+      ctx.set meta.attrs.model, value
+
+      ctx.instance.changed()
+      return true
+
+
+  link: (ctx, el, meta) ->
+    return unless @radio
+    if ctx.eval(meta.attrs.model) == ctx.interpolate(meta.attrs.value)
+      el.setAttribute 'checked', 'checked'
+
 UnicoApp.builtInDirectives['model'] = ModelDirective
