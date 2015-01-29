@@ -38,8 +38,8 @@ describe 'UnicoApp', ->
         callback = done
         app.addMountListener (() -> callback())
         app.addController 'test_controller', TestController
-        app.router.rootOptions layout: '/home/foo', controller: 'test_controller'
-        app.router.route '/bar', layout: '/home/bar', controller: 'test_controller'
+        app.router.rootOptions partial: '/home/foo', controller: 'test_controller'
+        app.router.route '/bar', partial: '/home/bar', controller: 'test_controller'
         app.startRouter()
 
       it 'should render differente layouts based on the path', (done) ->
@@ -72,8 +72,8 @@ describe 'UnicoApp', ->
         callback = done
         app.addMountListener (() -> callback())
         app.addController 'test_controller', TestController
-        app.router.rootOptions layout: '/home/foo', controller: 'test_controller'
-        app.router.route '/bar', layout: '/home/bar', controller: 'test_controller'
+        app.router.rootOptions partial: '/home/foo', controller: 'test_controller'
+        app.router.route '/bar', partial: '/home/bar', controller: 'test_controller'
         app.startRouter()
 
       it 'should render differente layouts based on the path', (done) ->

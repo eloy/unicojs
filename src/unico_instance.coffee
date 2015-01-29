@@ -13,7 +13,7 @@ class UnicoInstance
 
 
   buildRoute: (request, path) ->
-    partialPromise = @app.tmplFactory.loadTemplate @ctx, request.route.layout
+    partialPromise = @app.tmplFactory.loadTemplate @ctx, request.route.partial
     layoutPromise = @app.tmplFactory.loadTemplate @ctx, '/layouts/application.html'
 
     task = Promise.all [partialPromise, layoutPromise]

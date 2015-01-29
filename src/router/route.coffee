@@ -20,7 +20,7 @@ class Route
 
   setFromOptions: (opt) ->
     @controller = opt.controller
-    @layout = opt.layout
+    @partial = opt.partial
 
   route: (path, opt={}, childrensCallback) ->
     # copy namespace
@@ -32,15 +32,15 @@ class Route
     return r
 
   resources: (name, opt={}, childrensCallback) ->
-    layoutPrefix = if @namespace then "#{@namespace}/" else ""
-    layoutPrefix += "#{name}".replace("//", "/")
-    ctrlPrefix = layoutPrefix.replace("/", "_")
+    partialPrefix = if @namespace then "#{@namespace}/" else ""
+    partialPrefix += "#{name}".replace("//", "/")
+    ctrlPrefix = partialPrefix.replace("/", "_")
 
-    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", layout: "/#{layoutPrefix}/index", namespace: @namespace
-    index.route "/new", controller: "#{ctrlPrefix}#new", layout: "/#{layoutPrefix}/new"
+    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", partial: "/#{partialPrefix}/index", namespace: @namespace
+    index.route "/new", controller: "#{ctrlPrefix}#new", partial: "/#{partialPrefix}/new"
 
-    show = index.route "/:id", controller: "#{ctrlPrefix}#show", layout: "/#{layoutPrefix}/show", namespace: @namespace, resource: name
-    show.route "/edit", controller: "#{ctrlPrefix}#edit", layout: "/#{layoutPrefix}/edit", resourceMember: true
+    show = index.route "/:id", controller: "#{ctrlPrefix}#show", partial: "/#{partialPrefix}/show", namespace: @namespace, resource: name
+    show.route "/edit", controller: "#{ctrlPrefix}#edit", partial: "/#{partialPrefix}/edit", resourceMember: true
 
     @_routes.push(index)
     # Add childrens from callbacks.
@@ -69,7 +69,7 @@ class Route
   toHash: ->
     routes = []
     routes.push r.toHash() for r in @_routes
-    {path: @path, controller: @controller, layout: @layout, routes: routes }
+    {path: @path, controller: @controller, partial: @partial, routes: routes }
 
   buildPath: (path) ->
     base = ''

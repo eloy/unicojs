@@ -2,11 +2,11 @@ describe 'Router', ->
   describe 'route', ->
     it 'should add a route', ->
       r = new UnicoRouter()
-      r.route '/site', controller: 'site_controller', layout: '/site.html'
+      r.route '/site', controller: 'site_controller', partial: '/site.html'
       expect(r.root._routes.length).toBe 1
       expect(r.root._routes[0].path).toEqual '/site'
       expect(r.root._routes[0].controller).toEqual 'site_controller'
-      expect(r.root._routes[0].layout).toEqual '/site.html'
+      expect(r.root._routes[0].partial).toEqual '/site.html'
 
 
   describe 'find', ->
