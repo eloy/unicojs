@@ -4,7 +4,7 @@ class HistoryDriver
 
   set: (url, scope, title) ->
     history.pushState(scope, title, url);
-    @listener(@get())
+    @listener(@get()) if @listener
 
   addEventListener: (@listener) ->
     window.onpopstate = (=> @listener(@get()))

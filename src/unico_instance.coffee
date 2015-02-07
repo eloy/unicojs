@@ -4,7 +4,6 @@ class UnicoInstance
     @ctx.addChangeListener => @refresh()
     @contents = {}
 
-    # Extract meta from the element
   build: (@el) ->
     @metaRoot = new MetaElement(@ctx, @el)
     @reactClass = ReactFactory.buildClass @metaRoot, @ctx
@@ -14,7 +13,8 @@ class UnicoInstance
 
   buildRoute: (request, path) ->
     partialPromise = @app.tmplFactory.loadTemplate @ctx, request.route.partial
-    layoutPromise = @app.tmplFactory.loadTemplate @ctx, '/layouts/application.html'
+    layout_name = @ctx.ctrl.layout || "application"
+    layoutPromise = @app.tmplFactory.loadTemplate @ctx, "/layouts/#{layout_name}.html"
 
     task = Promise.all [partialPromise, layoutPromise]
     task.then (r) =>
