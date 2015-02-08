@@ -1,4 +1,5 @@
 class IfDirective
+
   build: (ctx, meta)->
     # Watch the expression
     ctx.evalAndWatch(meta.attrs.if)
