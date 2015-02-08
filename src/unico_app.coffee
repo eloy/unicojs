@@ -8,6 +8,7 @@ class UnicoApp
     @controllers = {}
     @directives = UnicoApp.builtInDirectives
     @components = {}
+    @models = {}
     @_mountedCallbacks = []
 
     if @opt.enableRouter
@@ -23,10 +24,17 @@ class UnicoApp
   addComponent: (name, clazz) ->
     @components[name] = clazz
 
+  addModel: (name, base, opt={}) ->
+    @models[name] = {base: base, opt: opt}
+
+  model: (name) ->
+    conf = @models[name]
+    return false unless conf
+    Model(conf.base, conf.opt)
+
   refresh: ->
     if @instances
       i.changed() for i in @instances
-
     true
 
   # One Time Render
