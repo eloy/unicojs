@@ -19,7 +19,11 @@ ReactFactory =
     meta.prepareIgnition ctx
 
     # Hide elements if attribute hide is true retuning null
-    return null if meta.attrs.hide
+    if meta.attrs.hide
+      if typeof(meta.attrs.hide) == 'function'
+        return null if meta.attrs.hide(ctx)
+      else
+        return null
 
     if meta.reactClass
       # Duplicate current meta and remove the class to avoid infinete loop

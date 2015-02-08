@@ -1,7 +1,9 @@
 class IfDirective
   build: (ctx, meta)->
-    val = ctx.eval meta.attrs.if
-    meta.attrs.hide = !val
+    # Watch the expression
+    ctx.evalAndWatch(meta.attrs.if)
 
-UnicoApp.builtInDirectives ||= {}
+    meta.attrs.hide = (ctx) ->
+      !ctx.eval(meta.attrs.if)
+
 UnicoApp.builtInDirectives['if'] = IfDirective
