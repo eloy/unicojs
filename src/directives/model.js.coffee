@@ -3,8 +3,13 @@ class ModelDirective
     if meta.tag == "input" && meta.attrs.type == "radio"
       @radio = true
       @attachRadioButton(ctx, meta)
+    else if meta.tag == "input" && meta.attrs.type == "checkbox"
+      @attachCheckBox(ctx, meta)
     else
       @attachValueLink(ctx, meta)
+
+  # Default Value Link
+  #----------------------------------------------------------------------
 
   attachValueLink: (ctx, meta) ->
     meta.attrs.valueLink = {
@@ -16,6 +21,23 @@ class ModelDirective
         return true
     }
 
+
+  # Check Box
+  #----------------------------------------------------------------------
+
+  attachCheckBox: (ctx, meta) ->
+    meta.attrs.checkedLink = {
+      value: (ctx.eval(meta.attrs.model) == true)
+
+      requestChange: (value) ->
+        ctx.set meta.attrs.model, value
+        ctx.instance.changed()
+        return true
+    }
+
+
+  # Radio Button
+  #----------------------------------------------------------------------
 
   # http://stackoverflow.com/a/25413172/1454862
   attachRadioButton: (ctx, meta) ->
