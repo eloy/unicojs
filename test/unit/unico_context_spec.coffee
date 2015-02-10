@@ -111,15 +111,15 @@ describe "UnicoContext", ->
       expect(changed).toBeTruthy()
 
 
-  describe 'digest', ->
-    it 'should emit a change event if some watched value changed', ->
-      ctrl = {foo: 'HEY'}
-      ctx = new UnicoContext instance, ctrl
-      changed = false
-      ctx.addChangeListener -> changed = true
-      ctx.evalAndWatch 'foo'
-      ctx.digest()
-      expect(changed).toBe false
-      ctrl.foo = 'HO'
-      ctx.digest()
-      expect(changed).toBe true
+  # describe 'digest', ->
+  #   it 'should emit a change event if some watched value changed', ->
+  #     ctrl = {foo: 'HEY'}
+  #     ctx = new UnicoContext instance, ctrl
+  #     changed = false
+  #     ctx.addChangeListener -> changed = true
+  #     ctx.evalAndWatch 'foo'
+  #     ctx.digest()
+  #     expect(changed).toBe false
+  #     ctrl.foo = 'HO'
+  #     ctx.digest()
+  #     expect(changed).toBe true

@@ -112,7 +112,7 @@ class UnicoContext
     c() for c in @_changeListeners
 
   digest: ->
-    @changed() if @hasChanges()
+    @changed() # if @hasChanges() # TODO: this worth be implemented?
 
   # Return true if some value change Whenever the view evaluate an
   # expression, we store the returned value.  With this function we
