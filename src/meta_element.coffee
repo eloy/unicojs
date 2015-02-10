@@ -74,7 +74,7 @@ class MetaElement
   _splitInterpolated: (content) ->
     childs = []
     lastPos = 0
-    content.replace /{{([\s\w\d\[\]_\(\)\.\$\?:"']+)}}/g, (match, capture, pos) =>
+    content.replace /{{([\s\w\d\[\]_\(\)\.\$\?\=\!:"']+)}}/g, (match, capture, pos) =>
       if pos > lastPos
         childs.push {t: "text", v: content.substr(lastPos, pos - lastPos)}
 

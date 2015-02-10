@@ -19,6 +19,14 @@ describe "UnicoContext", ->
         ctrl.test = false
         expect(ctx.eval(exp)).toEqual 'bar'
 
+      it 'should allow != ', ->
+        ctrl = {test: true }
+        ctx = new UnicoContext instance, ctrl
+        exp = "test != false ? 'foo' : 'bar'"
+        expect(ctx.eval(exp)).toEqual 'foo'
+        ctrl.test = false
+        expect(ctx.eval(exp)).toEqual 'bar'
+
     describe 'functions', ->
       it 'should eval the given function', ->
         ctrl = {test: -> 'foo'}
