@@ -2,60 +2,9 @@
   Unico is a js framework built on top of Facebook React and inspired
   by Angular. It is suitable for small widget as well as full single
   page applications.
-** Documentation
-*** Installation
-    Unico release includes 3 files:
-    * unico.core.js: Just the framework. You must download and require dependencies.
-    * unico.js: Bundle with unico and its dependencies. Development version.
-    * unico.min.js: Production ready build.
-*** Controllers
-#+begin_html
-<iframe width="100%" height="300" src="http://jsfiddle.net/txotin/0L7fsmfe/9/embedded/html,js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
-#+end_html
 
-    In order to use Unico as an standalone framework in your
-    application, you should add the tag 'controller' to the
-    container. Controllers are responsible of provide data to the view
-    and execute callbacks on user actions.
-*** Directives
-    Directives are the bridge between react elements and your
-    code. Directives give you the chance to manipulate the DOM node,
-    add custom listeners, or change the element behavior
-**** Built in directives
-***** if and unless
-      These directives control the visibility of the element.
+  Visit http://unicojs.com for more info
 
-      #+begin_html
-      <iframe width="100%" height="300" src="http://jsfiddle.net/txotin/z3qvh5wh/embedded/html,js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
-      #+end_html
-
-***** repeat
-      This directive let you iterate over arrays and objects.
-
-      #+begin_html
-      <iframe width="100%" height="300" src="http://jsfiddle.net/txotin/8zhhomrL/embedded/html,js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
-      #+end_html
-
-***** click
-      This directive execute a callback on click events. After execute the callback, it check for changes and update the view.
-
-      #+begin_html
-      <iframe width="100%" height="300" src="http://jsfiddle.net/txotin/z3qvh5wh/embedded/html,js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
-      #+end_html
-
-***** model
-      This directive provide 2 way data binding.
-
-      #+begin_html
-      <iframe width="100%" height="300" src="http://jsfiddle.net/txotin/z9w9ms5t/embedded/html,js,result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
-      #+end_html
-
-***** submit
-
-**** Create custom directives
-*** Components
-*** Models
-*** Router and Single Page Applications
 ** Dependencies
    * React:
    * path-to-regexp: https://github.com/pillarjs/path-to-regexp
