@@ -26,6 +26,18 @@ describe 'ReactFactory', ->
         expect($(react).text()).toEqual 'foo'
         expect(react).toMatch '</button>'
 
+    # HTML Comments
+    #----------------------------------------------------------------------
+
+    describe 'html comment', ->
+      it 'should return null', ->
+        ctrl = {info: 'foo'}
+        ctx = new UnicoContext instance, ctrl
+        meta = createMeta ctx, "<!-- Some comment -->"
+        expect(meta.tag).toEqual 'comment'
+        el = ReactFactory.buildElement meta, ctx
+        expect(el).toBe null
+
     # Directives
     #----------------------------------------------------------------------
 
@@ -51,7 +63,6 @@ describe 'ReactFactory', ->
         meta = createMeta ctx, '''<div foo="bar">Wadus</div>'''
         el = ReactFactory.buildElement meta, ctx
         expect(el.props.meta.reactClass).toBe false
-        expect(meta.reactClass).not.toBeDefined
 
 
     # Component

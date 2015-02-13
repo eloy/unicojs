@@ -20,6 +20,12 @@ class MetaElement
       @_runTransformations(el)
       nodes = @_extractChildrens(el)
       @nodes = nodes if nodes.length > 0
+
+    # comments
+    else if el.nodeType == el.COMMENT_NODE
+      @tag = "comment"
+
+    # Text nodes
     else
       # Text Node
       @text = true

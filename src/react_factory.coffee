@@ -14,6 +14,10 @@ ReactFactory =
     if meta.text
       return @buildTextElement meta, ctx
 
+    # html comments
+    if meta.tag == "comment"
+      return null
+
     # prepare meta for rendering. This initialize directives and call
     # buid on them
     meta.prepareIgnition ctx
