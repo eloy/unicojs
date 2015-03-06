@@ -42,23 +42,23 @@ describe 'Route', ->
       r = root.find('/users').route
       expect(r.path).toEqual '/users'
       expect(r.controller).toEqual 'users#index'
-      expect(r.partial).toEqual '/users/index'
+      expect(r.partial).toEqual '/users/index.html'
 
       r = root.find('/users/new').route
       expect(r.path).toEqual '/users/new'
       expect(r.controller).toEqual 'users#new'
-      expect(r.partial).toEqual '/users/new'
+      expect(r.partial).toEqual '/users/new.html'
 
       r = root.find('/users/1').route
       expect(r.path).toEqual '/users/:id'
       expect(r.controller).toEqual 'users#show'
-      expect(r.partial).toEqual '/users/show'
+      expect(r.partial).toEqual '/users/show.html'
 
 
       r = root.find('/users/1/edit').route
       expect(r.path).toEqual '/users/:id/edit'
       expect(r.controller).toEqual 'users#edit'
-      expect(r.partial).toEqual '/users/edit'
+      expect(r.partial).toEqual '/users/edit.html'
 
     describe 'parameter namespace', ->
       it 'should add the namespace to the route and his childrens', ->
@@ -73,25 +73,25 @@ describe 'Route', ->
         r = root.find('/admin/users').route
         expect(r.path).toEqual '/admin/users'
         expect(r.controller).toEqual 'admin_users#index'
-        expect(r.partial).toEqual '/admin/users/index'
+        expect(r.partial).toEqual '/admin/users/index.html'
 
         r = root.find('/admin/users/new').route
         expect(r.path).toEqual '/admin/users/new'
         expect(r.controller).toEqual 'admin_users#new'
-        expect(r.partial).toEqual '/admin/users/new'
+        expect(r.partial).toEqual '/admin/users/new.html'
 
         r = root.find('/admin/users/1').route
         expect(r.path).toEqual '/admin/users/:id'
         expect(r.controller).toEqual 'admin_users#show'
-        expect(r.partial).toEqual '/admin/users/show'
+        expect(r.partial).toEqual '/admin/users/show.html'
 
         r = root.find('/admin/users/1/edit').route
         expect(r.path).toEqual '/admin/users/:id/edit'
         expect(r.controller).toEqual 'admin_users#edit'
-        expect(r.partial).toEqual '/admin/users/edit'
+        expect(r.partial).toEqual '/admin/users/edit.html'
 
 
         r = root.find('/admin/users/1/posts/2/edit').route
         expect(r.path).toEqual '/admin/users/:user_id/posts/:id/edit'
         expect(r.controller).toEqual 'admin_posts#edit'
-        expect(r.partial).toEqual '/admin/posts/edit'
+        expect(r.partial).toEqual '/admin/posts/edit.html'

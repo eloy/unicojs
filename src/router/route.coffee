@@ -36,11 +36,11 @@ class Route
     partialPrefix += "#{name}".replace("//", "/")
     ctrlPrefix = partialPrefix.replace("/", "_")
 
-    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", partial: "/#{partialPrefix}/index", namespace: @namespace
-    index.route "/new", controller: "#{ctrlPrefix}#new", partial: "/#{partialPrefix}/new"
+    index = new Route @, "/#{name}", controller: "#{ctrlPrefix}#index", partial: "/#{partialPrefix}/index.html", namespace: @namespace
+    index.route "/new", controller: "#{ctrlPrefix}#new", partial: "/#{partialPrefix}/new.html"
 
-    show = index.route "/:id", controller: "#{ctrlPrefix}#show", partial: "/#{partialPrefix}/show", namespace: @namespace, resource: name
-    show.route "/edit", controller: "#{ctrlPrefix}#edit", partial: "/#{partialPrefix}/edit", resourceMember: true
+    show = index.route "/:id", controller: "#{ctrlPrefix}#show", partial: "/#{partialPrefix}/show.html", namespace: @namespace, resource: name
+    show.route "/edit", controller: "#{ctrlPrefix}#edit", partial: "/#{partialPrefix}/edit.html", resourceMember: true
 
     @_routes.push(index)
     # Add childrens from callbacks.

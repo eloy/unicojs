@@ -85,7 +85,11 @@ describe 'UnicoApp', ->
       afterEach ->
         expect($("#reactTarget").text()).toEqual 'Content is: BAR'
 
-  describe 'custom', ->
+
+  # Custom Layouts
+  #----------------------------------------------------------------------
+
+  describe 'custom layout', ->
     layoutHtml = '<div id="layout">Content is: <div content="main"></div></div>'
     fooHtml = '<div id="fooContent">{{foo}}</div>'
     barHtml = '<div id="barContent">{{bar}}</div>'
