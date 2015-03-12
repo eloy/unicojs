@@ -58,8 +58,8 @@ describe "UnicoContext", ->
 
     it 'should bypass escape characters', ->
       ctx = new UnicoContext instance, {test: 'foo'}
-      ctx.set("test", "'bar'")
-      expect(ctx.ctrl.test).toEqual "'bar'"
+      ctx.set("test", "'bar\nwadus'")
+      expect(ctx.ctrl.test).toEqual "'bar\nwadus'"
 
 
   # interpolate

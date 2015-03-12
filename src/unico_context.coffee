@@ -47,9 +47,9 @@ class UnicoContext
   # TODO: Test
   set: (target, v) ->
     value = v
-    unless typeof(n) == "number"
-      escaped = v.replace(/'/g, "\\'")
-      value = "'#{escaped}'"
+    unless typeof(v) == "number"
+      value = "unescape('#{escape(v)}')"
+
     exp = "#{target} = #{value}"
     @eval exp
 
