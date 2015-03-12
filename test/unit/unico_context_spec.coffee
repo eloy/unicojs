@@ -45,6 +45,23 @@ describe "UnicoContext", ->
         ctx = new UnicoContext instance, ctrl
         expect(ctx.eval("test")).toEqual 'foo'
 
+
+  # set
+  #----------------------------------------------------------------------
+
+  describe 'set', ->
+    it 'should set value', ->
+      ctx = new UnicoContext instance, {test: 'foo'}
+      ctx.set("test", 'bar')
+      expect(ctx.ctrl.test).toEqual 'bar'
+
+
+    it 'should bypass escape characters', ->
+      ctx = new UnicoContext instance, {test: 'foo'}
+      ctx.set("test", "'bar'")
+      expect(ctx.ctrl.test).toEqual "'bar'"
+
+
   # interpolate
   #----------------------------------------------------------------------
   describe 'interpolate', ->
