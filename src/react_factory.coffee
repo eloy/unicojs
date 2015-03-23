@@ -59,9 +59,10 @@ ReactFactory =
     else if meta.component
       childCtx = ctx.child meta.component.directive.instance
       if meta.component.template
-        content = @buildElement meta.component.template, childCtx
+        return @buildElement meta.component.template, childCtx
       else if meta.nodes
         content = @buildNodes meta.nodes, childCtx
+
 
     # HTML Element with childrens
     else if meta.nodes

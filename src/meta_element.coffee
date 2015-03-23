@@ -126,12 +126,6 @@ class MetaElement
       # Build template
       @component.template = clazz.__template_meta
 
-    # Replace the element tag name
-    if clazz.element
-      @tag = clazz.element
-    else
-      @tag = 'div'
-
     # Add directive
     @component.directive = { clazz: clazz }
     @directives ||= []

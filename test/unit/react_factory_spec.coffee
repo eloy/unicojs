@@ -69,29 +69,15 @@ describe 'ReactFactory', ->
     #----------------------------------------------------------------------
     it 'should insert template if present', ->
       class TestComponent
-        @template: '<div id="foo">FOO</div>'
+        @template: '<div class="foo">FOO</div>'
 
-      html = '<test id="bar"></test>'
+      html = '<test></test>'
       ctx = createCtx()
       app = ctx.app
       app.addComponent 'test', TestComponent
       meta = createMeta ctx, html
       page = renderMeta meta, ctx
-      expect(page).toEqual '<div id="bar"><div id="foo">FOO</div></div>'
-
-
-    it 'should replace the element for the one defined in the component', ->
-      class TestComponent
-        @template: '<div id="foo">FOO</div>'
-        @element: 'form'
-
-      html = '<test id="bar"></test>'
-      ctx = createCtx()
-      app = ctx.app
-      app.addComponent 'test', TestComponent
-      meta = createMeta ctx, html
-      page = renderMeta meta, ctx
-      expect(page).toEqual '<form id="bar"><div id="foo">FOO</div></form>'
+      expect(page).toEqual '<div class="foo">FOO</div>'
 
 
     it 'should add the directive to the scope', ->
@@ -99,13 +85,13 @@ describe 'ReactFactory', ->
         @template: '<div id="foo">{{bar}}</div>'
         bar: 'FOO'
 
-      html = '<test id="bar"></test>'
+      html = '<test></test>'
       ctx = createCtx()
       app = ctx.app
       app.addComponent 'test', TestComponent
       meta = createMeta ctx, html
       page = renderMeta meta, ctx
-      expect(page).toEqual '<div id="bar"><div id="foo">FOO</div></div>'
+      expect(page).toEqual '<div id="foo">FOO</div>'
 
 
     # Text Element
