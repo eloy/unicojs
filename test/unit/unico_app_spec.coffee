@@ -124,3 +124,50 @@ describe 'UnicoApp', ->
 
     afterEach ->
       expect($("#reactTarget").text()).toEqual 'Content is: BAR'
+
+
+
+  # beforeAction callback
+  #----------------------------------------------------------------------
+
+  describe 'beforeAction', ->
+    describe 'custom layout', ->
+      layoutHtml = '<div id="layout">Content is: <div content="main"></div></div>'
+      fooHtml = '<div id="fooContent">{{foo}}</div>'
+      barHtml = '<div id="barContent">{{bar}}</div>'
+      callback = undefined
+      app = new UnicoApp(enableRouter: true, routerType: 'history', targetElement: '#reactTarget')
+
+      class TestController
+        @beforeAction: (ctx, path) ->
+          return redirect: '/bar' if path == '/'
+
+
+        layout: 'custom'
+        foo: 'FOO'
+        bar: 'BAR'
+
+      beforeEach (done) ->
+        jasmine.Ajax.install();
+        jasmine.Ajax.stubRequest('/layouts/custom.html').andReturn responseText: layoutHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/foo').andReturn responseText: fooHtml, status: 200
+        jasmine.Ajax.stubRequest('/home/bar').andReturn responseText: barHtml, status: 200
+
+        addFixture '<div id="reactTarget"></div>'
+        callback = done
+        app.addMountListener (() -> callback())
+        app.addController 'test_controller', TestController
+        app.router.rootOptions partial: '/home/foo', controller: 'test_controller'
+        app.router.route '/foo', partial: '/home/foo', controller: 'test_controller'
+        app.router.route '/bar', partial: '/home/bar', controller: 'test_controller'
+        app.startRouter()
+        app.visit("/")
+
+      it 'should render differente partials based on the path', (done) ->
+        expect(app.router.driver.constructor.name).toEqual 'HistoryDriver'
+        expect($("#reactTarget").text()).toEqual 'Content is: BAR'
+        callback = done
+        app.visit '/foo'
+
+      afterEach ->
+        expect($("#reactTarget").text()).toEqual 'Content is: FOO'

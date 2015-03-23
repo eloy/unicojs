@@ -18,6 +18,11 @@ class UnicoApp
   addController: (name, clazz) ->
     @controllers[name] = clazz
 
+  controllerFromString: (ctrlNameOrInstance) ->
+    return ctrlNameOrInstance unless typeof(ctrlNameOrInstance) == 'string'
+    @controllers[ctrlNameOrInstance]
+
+
   addDirective: (name, clazz) ->
     @directives[name] = clazz
 
@@ -77,6 +82,15 @@ class UnicoApp
   _loadRoute: (request, path) ->
     try
       ctrlName = request.route.controller
+      ctrl = @controllerFromString(ctrlName)
+
+      # Run beforeAction methods if present
+      if ctrl.beforeAction
+        res = ctrl.beforeAction(path, request)
+        # Redirect
+        return @visit(res.redirect) if res && res.redirect
+
+
       instance = new UnicoInstance @, ctrlName, @reactRender, request.params
       @instances = [instance]
       instance.buildRoute request, path
