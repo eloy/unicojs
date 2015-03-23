@@ -1,9 +1,9 @@
-Request = (method, url, data) ->
-  request = (method, url, data, callback, errorCallback) ->
+Request = (method, url, data, opt={}) ->
+  request = (method, url, data, callback, errorCallback, opt) ->
     r = new XMLHttpRequest()
     r.onreadystatechange = ->
       if r.readyState == 4
-        if r.status == 200
+        if r.status >= 200 || r.status <= 299
           callback(r.responseText)
         else
           error = new Error('Server responded with a status of ' + r.status)
@@ -21,7 +21,7 @@ Request = (method, url, data) ->
   new Promise (fulfill, reject) ->
     success = (resp) -> fulfill(resp)
     error = (error) -> reject(error)
-    request method, url, data, success, error
+    request(method, url, data, success, error, opt)
 
 
 bindResult = (promise, res) ->
@@ -64,20 +64,20 @@ Model = (base, opt={}) ->
     unless args.length == 0
       url += "?" + args.join("&")
 
-    promise = Request('GET', url)
+    promise = Request('GET', url, {}, opt)
     return buildPromise(promise)
 
   put: (params={}, data) ->
     url = buildUrl base, params
-    promise = Request('PUT', url, data)
+    promise = Request('PUT', url, data, opt)
     return buildPromise(promise)
 
   post: (params={}, data) ->
     url = buildUrl base, params
-    promise = Request('POST', url, data)
+    promise = Request('POST', url, data, opt)
     return buildPromise(promise)
 
   delete: (params={}) ->
     url = buildUrl base, params
-    promise = Request('DELETE', url)
+    promise = Request('DELETE', url, nil, opt)
     return buildPromise(promise)
