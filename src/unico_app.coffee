@@ -10,6 +10,7 @@ class UnicoApp
     @components = {}
     @models = {}
     @_mountedCallbacks = []
+    @config = {}
 
     if @opt.enableRouter
       @router = @_createRouter()
@@ -35,6 +36,7 @@ class UnicoApp
   model: (name) ->
     conf = @models[name]
     return false unless conf
+    conf.opt.basicAuth = @config.basicAuth
     Model(conf.base, conf.opt)
 
   refresh: ->

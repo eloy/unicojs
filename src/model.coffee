@@ -11,6 +11,11 @@ Request = (method, url, data, opt={}) ->
 
     r.open method, url
 
+    if opt.basicAuth
+      auth = "#{opt.basicAuth.user}:#{opt.basicAuth.password}"
+      encoded = Base64.encode(auth)
+      r.setRequestHeader("Authorization", "Basic #{encoded}");
+
     # Send data as JSON encoded
     if method != 'GET' && data
       r.setRequestHeader('Content-type','application/json; charset=utf-8')
