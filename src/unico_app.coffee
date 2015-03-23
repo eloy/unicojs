@@ -108,3 +108,16 @@ class UnicoApp
 
   _onMounted: ->
     c() for c in @_mountedCallbacks
+
+  # cookies
+  #----------------------------------------------------------------------
+  getCookie: (name) ->
+    pattern = RegExp(name + '=.[^;]*')
+    matched = document.cookie.match(pattern)
+    if matched
+      c = matched[0].split('=')
+      return c[1]
+    false
+
+  deleteCookie: (name) ->
+    document.cookie = "#{name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
