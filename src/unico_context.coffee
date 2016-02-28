@@ -10,7 +10,7 @@ class UnicoContext
   _createOrInstantiateController: (ctrlNameOrInstance) ->
     return ctrlNameOrInstance unless typeof(ctrlNameOrInstance) == 'string'
     clazz = @app.controllers[ctrlNameOrInstance]
-    ctrl = new clazz(@)
+    ctrl = new clazz(@) if clazz
 
 
   # Return a new evalutor with a copy of this, plus the given scope.
@@ -47,7 +47,10 @@ class UnicoContext
   # TODO: Test
   set: (target, v) ->
     value = v
-    unless typeof(v) == "number"
+
+    # Escape strings and other input types
+    valueType = typeof(v)
+    unless valueType == "number" || valueType == "boolean"
       value = "unescape('#{escape(v)}')"
 
     exp = "#{target} = #{value}"
