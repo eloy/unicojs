@@ -15,6 +15,9 @@ Request = (method, url, data, opt={}) ->
 
     r.open method, url
 
+    # Add custom headers
+    r.setRequestHeader(k,v) for k,v of RequestHeaders
+
     if opt.basicAuth
       auth = "#{opt.basicAuth.user}:#{opt.basicAuth.password}"
       encoded = Base64.encode(auth)
