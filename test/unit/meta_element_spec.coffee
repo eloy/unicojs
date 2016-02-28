@@ -76,6 +76,15 @@ describe 'MetaElement', ->
         {t: "text", v: " end"}
       ]
 
+    it 'should support ||', ->
+      el = new MetaElement ctx, {}
+      html = "var is {{foo || bar}}"
+      expect(el._splitInterpolated(html)).toEqual [
+        {t: "text", v: "var is "},
+        {t: "exp", v: "foo || bar"},
+      ]
+
+
 
   # _denormalizeRepeat
   #----------------------------------------------------------------------

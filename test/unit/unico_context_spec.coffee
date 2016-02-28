@@ -27,6 +27,14 @@ describe "UnicoContext", ->
         ctrl.test = false
         expect(ctx.eval(exp)).toEqual 'bar'
 
+      it 'should allow || ', ->
+        ctrl = {foo: {bar: "bar"} }
+        ctx = new UnicoContext instance, ctrl
+        exp = "foo.foo || foo.bar"
+        expect(ctx.eval(exp)).toEqual 'bar'
+        ctrl.foo.foo = "foo"
+        expect(ctx.eval(exp)).toEqual 'foo'
+
     describe 'functions', ->
       it 'should eval the given function', ->
         ctrl = {test: -> 'foo'}
@@ -70,6 +78,12 @@ describe "UnicoContext", ->
       ctx = new UnicoContext instance, ctrl
       expect(ctx.interpolate("I saw {{foo}} in the {{bar()}}")).toEqual 'I saw F00 in the B44R'
 
+    it 'should include ||', ->
+      ctrl = {foo: {bar: "bar"} }
+      ctx = new UnicoContext instance, ctrl
+      expect(ctx.interpolate("var is {{foo.foo || foo.bar}}")).toEqual 'var is bar'
+      ctrl.foo.foo = "foo"
+      expect(ctx.interpolate("var is {{foo.foo || foo.bar}}")).toEqual 'var is foo'
 
   # child
   #----------------------------------------------------------------------
