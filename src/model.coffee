@@ -91,5 +91,5 @@ Model = (base, opt={}) ->
 
   delete: (params={}) ->
     url = buildUrl base, params
-    promise = Request('DELETE', url, nil, opt)
+    promise = Request('DELETE', url, undefined, opt)
     return buildPromise(promise)
