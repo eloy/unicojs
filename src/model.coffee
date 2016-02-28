@@ -1,9 +1,13 @@
+RequestHeaders = {}
 Request = (method, url, data, opt={}) ->
+
   request = (method, url, data, callback, errorCallback, opt) ->
     r = new XMLHttpRequest()
+
+
     r.onreadystatechange = ->
       if r.readyState == 4
-        if r.status >= 200 || r.status <= 299
+        if r.status >= 200 && r.status <= 299
           callback(r.responseText)
         else
           error = new Error('Server responded with a status of ' + r.status)
