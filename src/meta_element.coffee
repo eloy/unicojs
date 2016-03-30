@@ -119,7 +119,8 @@ class MetaElement
 
 
   _attachComponent: ->
-    return unless clazz = @ctx.app.components[@tag]
+    name = if @attrs && @attrs.component then @attrs.component else @tag
+    return unless clazz = @ctx.app.components[name]
     @component = { clazz: clazz }
     if clazz.template?
       clazz.__template_meta ||= MetaElement.fromStr @ctx, clazz.template

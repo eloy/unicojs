@@ -136,11 +136,23 @@ describe 'MetaElement', ->
       expect(meta.reactClass).toBeDefined()
 
 
-  describe 'attachComponent', ->
+  describe 'attachComponent from tag', ->
     it 'should extract build this.component', ->
       class TestComponent
         @template: '<div id="foo">FOO</div>'
       html = '<test id="bar"></test>'
+      ctx = createCtx()
+      app = ctx.app
+      app.addComponent 'test', TestComponent
+      meta = createMeta ctx, html
+      expect(meta.component).toBeDefined()
+      expect(meta.reactClass).toBeDefined()
+
+  describe 'attachComponent from property', ->
+    it 'should extract build this.component', ->
+      class TestComponent
+        @template: '<div id="foo">FOO</div>'
+      html = '<div component="test" id="bar"></div>'
       ctx = createCtx()
       app = ctx.app
       app.addComponent 'test', TestComponent
