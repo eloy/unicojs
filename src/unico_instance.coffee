@@ -8,7 +8,7 @@ class UnicoInstance
     @metaRoot = new MetaElement(@ctx, @el)
     @reactClass = ReactFactory.buildClass @metaRoot, @ctx
     @reactElement = React.createElement(@reactClass)
-    @reactRender = React.render @reactElement, @el
+    @reactRender = ReactDOM.render @reactElement, @el
 
 
   buildRoute: (request, path) ->
@@ -25,11 +25,15 @@ class UnicoInstance
       targetMeta = new MetaElement @ctx, document.createElement('div')
       targetMeta.nodes = layout.meta.nodes
       @routeMeta = targetMeta
-      @refresh()
+      @reactRender.setProps meta: @routeMeta, ctx: @ctx, =>
+        @app._onMounted()
+        @app.triggerAfterRender()
+      # @refresh()
 
   refresh: ->
     return false unless @reactRender
-    @reactRender.setProps meta: @routeMeta, ctx: @ctx, (=> @app._onMounted() )
+    @reactRender.forceUpdate => @app.triggerAfterRender()
+
     return true
 
   digest: ->
