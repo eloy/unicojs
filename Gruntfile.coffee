@@ -8,7 +8,7 @@ module.exports = (grunt) ->
       compile:
         options: { bare: true }
         files: {
-          'dist/unico.core.js': ['src/*.coffee', 'src/directives/*.coffee', 'src/router/*.coffee']
+          'dist/unico.core.js': ['src/*.coffee', 'src/directives/*.coffee', 'src/components/*.coffee', 'src/router/*.coffee']
         }
 
     concat:

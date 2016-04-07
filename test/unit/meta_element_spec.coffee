@@ -113,6 +113,39 @@ describe 'MetaElement', ->
         meta = createMeta ctx, '''<div repeat="item, name in items()">Wadus</div>'''
         expect(meta.repeatExp).toEqual {key: 'item', value: 'name' , src: 'items()'}
 
+
+  # _denormalizeOptions
+  #----------------------------------------------------------------------
+
+  describe '_denormalizeOptions', ->
+    it 'should not set as options if expression does not match', ->
+      meta = createMeta ctx, '''<div options="items()">Wadus</div>'''
+      expect(meta.options).toBeFalsy()
+
+
+    describe 'as a collection', ->
+      it 'should extract variables and expression from options property', ->
+        meta = createMeta ctx, '''<div options="item from item in items">Wadus</div>'''
+        expect(meta.optionsExp.from).toEqual {value: 'item', src: 'items'}
+        expect(meta.optionsExp.field).toEqual {value: 'item', src: 'item'}
+
+      it 'should extract variables and expression from options function', ->
+        meta = createMeta ctx, '''<div options="item from item in items()">Wadus</div>'''
+        expect(meta.optionsExp.from).toEqual {value: 'item', src: 'items()'}
+        expect(meta.optionsExp.field).toEqual {value: 'item', src: 'item'}
+
+    describe 'as a hash', ->
+      it 'should extract variables and expression from options property', ->
+        meta = createMeta ctx, '''<div options="item as name from item, name in items">Wadus</div>'''
+        expect(meta.optionsExp.from).toEqual {key: 'item', value: 'name' , src: 'items'}
+        expect(meta.optionsExp.field).toEqual {key: "item", value: 'name', src: 'item as name'}
+
+      it 'should extract variables and expression from options function', ->
+        meta = createMeta ctx, '''<div options="name.id as name.label from item, name in items()">Wadus</div>'''
+        expect(meta.optionsExp.from).toEqual {key: 'item', value: 'name' , src: 'items()'}
+        expect(meta.optionsExp.field).toEqual {key: "name.id", value: 'name.label', src: 'name.id as name.label'}
+
+
   # _attachDirectives
   #----------------------------------------------------------------------
 

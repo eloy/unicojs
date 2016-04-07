@@ -36,7 +36,7 @@ ReactFactory =
       return React.createElement meta.reactClass, {meta: metaDup, ctx: ctx}
 
     # If it is a repeat element
-    if meta.repeat
+    if meta.repeatExp
       content = @_buildRepeatNodes meta, ctx
 
     # Template placeholder
