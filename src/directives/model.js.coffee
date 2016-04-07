@@ -16,6 +16,8 @@ class ModelDirective
       value: ctx.eval(meta.attrs.model)
 
       requestChange: (value) ->
+        if meta.tag == "input" && meta.attrs.type == "number"
+          value = parseInt(value)
         ctx.set meta.attrs.model, value
         ctx.instance.changed()
         return true
@@ -52,6 +54,7 @@ class ModelDirective
 
       ctx.instance.changed()
       return true
+
 
 
   link: (ctx, el, meta) ->
