@@ -1,7 +1,11 @@
 class MetaElement
   constructor: (@ctx, el) ->
+    @initializeElement(el) if el
+
+  initializeElement: (el) ->
     @_extractMeta el
     @_denormalizeRepeat()
+    @_denormalizeOptions()
     @_attachComponent()
     @_attachDirectives()
     @_createClass()
@@ -12,6 +16,11 @@ class MetaElement
     if el.childNodes.length != 1
       new Error("fromStr require one single element")
     new MetaElement ctx, el.childNodes[0]
+
+  clone: ->
+    instance = new MetaElement(@ctx)
+    Object.assign(instance, @)
+
 
   _extractMeta: (el) ->
     if el.tagName
@@ -140,33 +149,57 @@ class MetaElement
     mountedCallback = ->
       for d in @props.meta.directives
         if d.instance.link
-          d.instance.link @props.ctx, @getDOMNode(), @props.meta
+          d.instance.link @props.ctx, ReactDOM.findDOMNode(@), @props.meta
 
     receiveProps = ->
       for d in @props.meta.directives
         if d.instance.onRefresh
-          d.instance.onRefresh @props.ctx, @getDOMNode(), @props.meta
+          d.instance.onRefresh @props.ctx, ReactDOM.findDOMNode(@), @props.meta
 
     @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback, componentWillReceiveProps: receiveProps
 
 
-  # Denormalize expression from collection in form
-  # "value in items()" or "key, value in items()
   _denormalizeRepeat: ->
     return unless @attrs?.repeat
-    exp = @attrs.repeat.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\s\w\d\[\]_\(\)\.\$"']+)/)
-    return unless exp
+    @repeatExp = @_denormalizeCollectionExp @attrs.repeat
+
+  # Denormalize expression from collection in form
+  # "value in items()" or "key, value in items()
+  _denormalizeOptions: ->
+    return unless @attrs?.options
+    optExp = @attrs.options.match(/(.*) from (.*)/)
+    return unless optExp
+    fieldExp = @_denormalizeFieldExp optExp[1]
+    fromExp = @_denormalizeCollectionExp optExp[2]
+    @optionsExp = {field: fieldExp, from: fromExp}
+
+  # Denormalize expression from collection in form
+  # "value in items()" or "key, value in items()
+  _denormalizeCollectionExp: (str) ->
+    exp = str.match(/([\w\d_\$]+)\s?,?\s?([\w\d_\$]+)?\s+in\s+([\s\w\d\[\]_\(\)\.\$"']+)/)
+    return undefined unless exp
     exp_1 = exp[1]
     exp_2 = exp[2]
     collectionExpression = exp[3]
-    @repeat = true
-    @repeatExp = {src: collectionExpression}
+    exp = {src: collectionExpression}
 
     if exp_2
-      @repeatExp.key = exp_1
-      @repeatExp.value = exp_2
+      exp.key = exp_1
+      exp.value = exp_2
     else
-      @repeatExp.value = exp_1
+      exp.value = exp_1
+
+    return exp
+
+  _denormalizeFieldExp: (str) ->
+    exp = str.match(/([\w\d\[\]_\(\)\.\$"']+)(\sas\s)?([\s\w\d\[\]_\(\)\.\$"']+)?/)
+    return false unless exp
+    if exp[2]
+      {src: str, key: exp[1], value: exp[3]}
+    else
+      {src: str, value: exp[1]}
+
+
 
   _runTransformations: ->
     # Register template

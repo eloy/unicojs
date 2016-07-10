@@ -3,13 +3,15 @@
 
 class UnicoApp
   @builtInDirectives = {}
+  @builtInComponents = {}
 
   constructor: (@opt={})->
     @controllers = {}
     @directives = UnicoApp.builtInDirectives
-    @components = {}
+    @components = UnicoApp.builtInComponents
     @models = {}
     @_mountedCallbacks = []
+    @_afterRenderCallbacks = []
     @config = {}
 
     if @opt.enableRouter
@@ -68,7 +70,7 @@ class UnicoApp
       ReactFactory.buildElement @props.meta, @props.ctx
 
     reactElement = React.createElement(reactClass, {meta: false, ctx: false})
-    @reactRender = React.render reactElement, body
+    @reactRender = ReactDOM.render reactElement, body
 
 
   visit: (path) ->
@@ -111,8 +113,16 @@ class UnicoApp
   _onMounted: ->
     c() for c in @_mountedCallbacks
 
+  afterRender: (callback) ->
+    @_afterRenderCallbacks.push callback
+
+  triggerAfterRender: ->
+    cb() for cb in @_afterRenderCallbacks
+    @_afterRenderCallbacks = []
+
   # cookies
   #----------------------------------------------------------------------
+
   getCookie: (name) ->
     pattern = RegExp(name + '=.[^;]*')
     matched = document.cookie.match(pattern)

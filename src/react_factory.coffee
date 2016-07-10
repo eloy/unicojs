@@ -31,12 +31,12 @@ ReactFactory =
 
     if meta.reactClass
       # Duplicate current meta and remove the class to avoid infinete loop
-      metaDup = Object.create(meta)
+      metaDup = meta.clone()
       metaDup.reactClass = false
       return React.createElement meta.reactClass, {meta: metaDup, ctx: ctx}
 
     # If it is a repeat element
-    if meta.repeat
+    if meta.repeatExp
       content = @_buildRepeatNodes meta, ctx
 
     # Template placeholder
@@ -102,7 +102,7 @@ ReactFactory =
         scope = {"$index": index}
         scope[meta.repeatExp.value] = v
         childCtx = ctx.child scope
-        childNodes = Object.create(meta.nodes)
+        childNodes = meta.nodes.map (m) -> m.clone()
         nodes.push @buildNodes childNodes, childCtx
 
     else
@@ -112,7 +112,7 @@ ReactFactory =
         if meta.repeatExp.key
           scope[meta.repeatExp.key] = k
         childCtx = ctx.child scope
-        childNodes = Object.create(meta.nodes)
+        childNodes = meta.nodes.map (m) -> m.clone()
         nodes.push @buildNodes childNodes, childCtx
 
     return nodes
