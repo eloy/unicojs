@@ -18,7 +18,7 @@ class UnicoContext
   child: (scope={}, opt={}) ->
     # Build a childController with the content of this controller
     # including parent context and parent of parent context
-    newScope = Object.create(@scope)
+    newScope = Object.assign({}, @scope)
     for key, value of scope
       newScope[key] = value
 

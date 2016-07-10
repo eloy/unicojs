@@ -1,5 +1,8 @@
 class MetaElement
   constructor: (@ctx, el) ->
+    @initializeElement(el) if el
+
+  initializeElement: (el) ->
     @_extractMeta el
     @_denormalizeRepeat()
     @_denormalizeOptions()
@@ -13,6 +16,11 @@ class MetaElement
     if el.childNodes.length != 1
       new Error("fromStr require one single element")
     new MetaElement ctx, el.childNodes[0]
+
+  clone: ->
+    instance = new MetaElement(@ctx)
+    Object.assign(instance, @)
+
 
   _extractMeta: (el) ->
     if el.tagName
