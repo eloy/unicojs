@@ -14,18 +14,19 @@
     "coffee-script": "*"
   },
   "devDependencies": {
-    "karma": "~0.12.28",
-    "karma-jasmine": "~0.3.2",
-    "jasmine-core": "~2.1.3",
-    "requirejs": "~2.1.15",
-    "karma-requirejs": "~0.2.2",
-    "karma-phantomjs-launcher": "~0.1.4",
-    "karma-coffee-preprocessor": "~0.2.1",
     "grunt": "~0.4.5",
     "grunt-contrib-coffee": "~0.12.0",
     "grunt-contrib-concat": "~0.5.0",
     "grunt-contrib-uglify": "~0.6.0",
-    "karma-chrome-launcher": "~0.1.7"
+    "grunt-file-append": "0.0.6",
+    "jasmine-core": "~2.1.3",
+    "karma": "~0.12.28",
+    "karma-chrome-launcher": "~0.1.7",
+    "karma-coffee-preprocessor": "~0.2.1",
+    "karma-jasmine": "~0.3.2",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-requirejs": "~0.2.2",
+    "requirejs": "~2.1.15"
   },
   "repositories": [
     {
@@ -36,6 +37,5 @@
   "scripts": {
     "test": "./node_modules/karma/bin/karma start --single-run --browsers PhantomJS"
   },
-
   "homepage": "https://github.com/harlock/unicojs"
 }
