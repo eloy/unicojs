@@ -8,7 +8,7 @@ describe 'models', ->
       jasmine.Ajax.install();
       jasmine.Ajax.stubRequest('/api/foo').andReturn responseText: JSON.stringify({foo: 'bar'})
       model = app.model 'foo'
-      model.index().done (data) ->
+      model.index().then (data) ->
         resp = data
         done()
 
@@ -24,7 +24,7 @@ describe 'models', ->
       jasmine.Ajax.install();
       jasmine.Ajax.stubRequest('/api/foo').andReturn responseText: 'foo bar'
       model = app.model 'foo'
-      model.index().done (data) ->
+      model.index().then (data) ->
         resp = data
         done()
 
@@ -40,7 +40,7 @@ describe 'models', ->
       jasmine.Ajax.install();
       jasmine.Ajax.stubRequest('/api/foo').andReturn responseText: 'foo bar'
       model = app.model 'foo'
-      model.index().done (data) ->
+      model.index().then (data) ->
         resp = data
         done()
 
@@ -60,7 +60,7 @@ describe 'models', ->
         jasmine.Ajax.install();
         jasmine.Ajax.stubRequest('/api/foo/1').andReturn responseText: 'foo bar'
         model = app.model 'foo'
-        model.get(id: 1).done (data) ->
+        model.get(id: 1).then (data) ->
           resp = data
           done()
 
@@ -76,7 +76,7 @@ describe 'models', ->
         jasmine.Ajax.install();
         jasmine.Ajax.stubRequest('/api/foo').andReturn responseText: 'foo bar'
         model = app.model 'foo'
-        model.get().done (data) ->
+        model.get().then (data) ->
           resp = data
           done()
 
@@ -92,7 +92,7 @@ describe 'models', ->
         jasmine.Ajax.install();
         jasmine.Ajax.stubRequest('/api/foo?foo=bar').andReturn responseText: 'foo bar'
         model = app.model 'foo'
-        model.get({}, foo: 'bar').done (data) ->
+        model.get({}, foo: 'bar').then (data) ->
           resp = data
           done()
 

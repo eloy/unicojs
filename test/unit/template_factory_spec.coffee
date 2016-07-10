@@ -7,7 +7,7 @@ describe 'TemplateFactory', ->
         spyOn(SendRequest, 'get').and.callThrough();
         f = new TemplateFactory()
         f.addLayout 'foo', html
-        f.loadTemplate({}, 'foo').done (l) ->
+        f.loadTemplate({}, 'foo').then (l) ->
           layout = l
           done()
 
@@ -21,7 +21,7 @@ describe 'TemplateFactory', ->
         spyOn(SendRequest, 'get').and.callThrough();
         f = new TemplateFactory()
         f.base = '/base/test/fixtures/'
-        f.loadTemplate(createCtx(), 'template_1.html').done (l) ->
+        f.loadTemplate(createCtx(), 'template_1.html').then (l) ->
           layout = l
           done()
 
@@ -41,7 +41,7 @@ describe 'TemplateFactory', ->
         jasmine.Ajax.install()
         jasmine.Ajax.stubRequest('/foo').andReturn responseText: html, status: 200
         f = new TemplateFactory()
-        f.loadTemplate(ctx, '/foo').done (t) ->
+        f.loadTemplate(ctx, '/foo').then (t) ->
           layout = t.html
           done()
 

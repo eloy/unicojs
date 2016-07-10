@@ -21,7 +21,7 @@ describe 'SendRequest', ->
       promise = undefined
       beforeEach (done) ->
         promise = SendRequest.get('/base/test/fixtures/test.txt')
-        promise.done (v) ->
+        promise.then (v) ->
           value = v
           done()
 
