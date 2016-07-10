@@ -28,7 +28,9 @@ evalOptions = (ctx, exp) ->
 buildSelect = (ctx, meta) ->
   buildOptions: ->
     opt = []
+
     opt.push React.createElement("option", { key: null, value: 0, disabled: true }, "Select one")
+
     if meta.optionsExp
       options = evalOptions ctx, meta.optionsExp
       for o in options
@@ -36,6 +38,11 @@ buildSelect = (ctx, meta) ->
         value = o.key || o.label
         label = o.label
         opt.push React.createElement("option", { key: key, value: value }, label)
+
+    # Add options from markup
+    for node in meta.nodes
+      opt.push ReactFactory.buildElement node, ctx
+
     return opt
 
   onChange: (e) ->
