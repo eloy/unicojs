@@ -46,6 +46,11 @@ class UnicoApp
       i.changed() for i in @instances
     true
 
+  @buildContext: (instance, ctrlNameOrInstance, scope={}) ->
+    new UnicoContext(instance, ctrlNameOrInstance, scope)
+
+
+
   # One Time Render
   #----------------------------------------------------------------------
 
