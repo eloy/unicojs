@@ -29,19 +29,20 @@ buildSelect = (ctx, meta) ->
   buildOptions: ->
     opt = []
 
-    opt.push React.createElement("option", { key: null, value: 0, disabled: true }, "Select one")
+    opt.push React.createElement("option", { key: null, value: null}, "Select one")
 
     if meta.optionsExp
       options = evalOptions ctx, meta.optionsExp
       for o in options
-        key = o.key || o.label
-        value = o.key || o.label
+        key = o.key
+        value = if ("value" in o) then o.value else key
         label = o.label
         opt.push React.createElement("option", { key: key, value: value }, label)
 
     # Add options from markup
-    for node in meta.nodes
-      opt.push ReactFactory.buildElement node, ctx
+    if meta.nodes
+      for node in meta.nodes
+        opt.push ReactFactory.buildElement node, ctx
 
     return opt
 
@@ -51,10 +52,11 @@ buildSelect = (ctx, meta) ->
     ctx.instance.changed()
 
   render: ->
-    opt = {}
+    opt = {className: meta.attrs.className}
     if meta.attrs.model
-      opt.value = ctx.eval(meta.attrs.model) || 0
+      opt.value = ctx.eval(meta.attrs.model)
       opt.onChange = @onChange
+
     React.createElement("select", opt, @buildOptions())
 
 class SelectComponent
