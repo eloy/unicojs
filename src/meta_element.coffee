@@ -76,6 +76,7 @@ class MetaElement
 
       # Do some transformations for react
       key = "className" if key == "class"
+      key = "encType" if key == "enctype"
 
       # Assign the value
       if varRegexp.test(value)
