@@ -5,6 +5,9 @@ class ModelDirective
       @attachRadioButton(ctx, meta)
     else if meta.tag == "input" && meta.attrs.type == "checkbox"
       @attachCheckBox(ctx, meta)
+    else if meta.tag == "input" && meta.attrs.type == "file"
+      @attachFile(ctx, meta)
+
     else
       @attachValueLink(ctx, meta)
 
@@ -37,6 +40,15 @@ class ModelDirective
         return true
     }
 
+
+  # File
+  #----------------------------------------------------------------------
+
+  attachFile: (ctx, meta) ->
+    meta.attrs.onChange = (event) ->
+      files = event.target.files
+      ctx.set meta.attrs.model, files
+      ctx.instance.changed()
 
   # Radio Button
   #----------------------------------------------------------------------
