@@ -30,8 +30,14 @@ class UnicoContext
   #----------------------------------------------------------------------
 
   # evaluate the given expression
-  eval: (expression) ->
+  eval: (expression, extra=false) ->
     p = @_extractParams()
+
+    if extra
+      for k,v of extra
+        p.keys.push k
+        p.values.push v
+
     try
       # Execute expression
       cmd = "return #{expression};"
@@ -45,27 +51,27 @@ class UnicoContext
       return null
 
   # TODO: Test
-  set: (target, v) ->
-    value = v
+  set: (target, value) ->
+    # value = v
 
-    # Escape strings and other input types
-    valueType = typeof(v)
-    unless valueType == "number" || valueType == "boolean"
-      value = "unescape('#{escape(v)}')"
+    # # Escape strings and other input types
+    # valueType = typeof(v)
+    # unless valueType == "number" || valueType == "boolean"
+    #   value = "unescape('#{escape(v)}')"
 
-    exp = "#{target} = #{value}"
-    @eval exp
+    exp = "#{target} = __value;"
+    @eval exp, {__value: value}
 
-    # UGLY HACK
-    # Sometimes when updating values from the controller we need
-    # to append the this prefix. That doesn't happens with values
-    # in the scope, need to figure out. So the solution is ask for
-    # the value after set without the prefix. If the value doesn't
-    # change, then try again with the prefix
+    # # UGLY HACK
+    # # Sometimes when updating values from the controller we need
+    # # to append the this prefix. That doesn't happens with values
+    # # in the scope, need to figure out. So the solution is ask for
+    # # the value after set without the prefix. If the value doesn't
+    # # change, then try again with the prefix
 
-    if @eval(target) != v
-      exp = "this.#{target} = #{value}"
-      @eval exp
+    if @eval(target) != value
+      exp = "this.#{target} = __value"
+      @eval exp, {__value: value}
 
 
   # Search and replace expressions in the given text
