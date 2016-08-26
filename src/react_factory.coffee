@@ -98,8 +98,9 @@ ReactFactory =
     nodes = []
     src = ctx.evalAndWatch meta.repeatExp.src
     if src instanceof Array
+      last = src.length - 1
       for v, index in src
-        scope = {"$index": index}
+        scope = {"$index": index, "$first": index == 0, "$last": index == last}
         scope[meta.repeatExp.value] = v
         childCtx = ctx.child scope
         childNodes = meta.nodes.map (m) -> m.clone()
