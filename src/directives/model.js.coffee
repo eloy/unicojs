@@ -1,5 +1,11 @@
 class ModelDirective
+  beforeRender: ->
+    @meta.attrs.value = @ctx.eval(@meta.attrs.model)
+
   build: (ctx, meta) ->
+    @ctx = ctx
+    @meta = meta
+
     if meta.tag == "input" && meta.attrs.type == "radio"
       @radio = true
       @attachRadioButton(ctx, meta)
@@ -15,16 +21,15 @@ class ModelDirective
   #----------------------------------------------------------------------
 
   attachValueLink: (ctx, meta) ->
-    meta.attrs.valueLink = {
-      value: ctx.eval(meta.attrs.model)
+    meta.attrs.value = ctx.eval(meta.attrs.model)
+    meta.attrs.onChange = (event) ->
+      value = event.currentTarget.value
+      if meta.tag == "input" && meta.attrs.type == "number"
+        value = parseInt(value)
+      ctx.set meta.attrs.model, value
+      ctx.instance.changed()
+      return true
 
-      requestChange: (value) ->
-        if meta.tag == "input" && meta.attrs.type == "number"
-          value = parseInt(value)
-        ctx.set meta.attrs.model, value
-        ctx.instance.changed()
-        return true
-    }
 
 
   # Check Box
@@ -67,11 +72,12 @@ class ModelDirective
       ctx.instance.changed()
       return true
 
-
+  beforeRender: ->
+    return true unless @radio
+    checked = @ctx.eval(@meta.attrs.model) == @ctx.interpolate(@meta.attrs.value)
+    @meta.attrs.checked = checked
 
   link: (ctx, el, meta) ->
-    return unless @radio
-    if ctx.eval(meta.attrs.model) == ctx.interpolate(meta.attrs.value)
-      el.setAttribute 'checked', 'checked'
+
 
 UnicoApp.builtInDirectives['model'] = ModelDirective
