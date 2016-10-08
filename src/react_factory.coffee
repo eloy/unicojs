@@ -1,7 +1,8 @@
 ReactFactory =
   buildClass: (meta, ctx) ->
-    React.createClass render: ->
-      ReactFactory.buildElement meta, ctx
+    React.createClass
+      render: ->
+        ReactFactory.buildElement meta, ctx
 
   buildNodes: (nodes, ctx) ->
     r = []

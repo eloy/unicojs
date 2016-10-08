@@ -113,8 +113,11 @@ class MetaElement
     if @directives?
       # Instantiate directives and call build if present
       for d in @directives
-        d.instance = new d.clazz()
-        d.instance.build(ctx, @) if d.instance.build?
+        if d.instance_ctx != ctx
+          d.instance_ctx = ctx
+          d.instance = new d.clazz()
+          d.instance.build(ctx, @) if d.instance.build?
+
     if @attrsInterpolated
       for name, exp of @attrsInterpolated
         @attrs[name] = ctx.interpolate(exp)
@@ -146,18 +149,18 @@ class MetaElement
   _createClass: ->
     return unless @directives?
     # Create reactClass
-    renderCallback = -> ReactFactory.buildElement @props.meta, @props.ctx
+    renderCallback = ->
+      for d in @props.meta.directives
+        d.instance.beforeRender() if d.instance.beforeRender
+
+      ReactFactory.buildElement @props.meta, @props.ctx
+
     mountedCallback = ->
       for d in @props.meta.directives
         if d.instance.link
           d.instance.link @props.ctx, ReactDOM.findDOMNode(@), @props.meta
 
-    receiveProps = ->
-      for d in @props.meta.directives
-        if d.instance.onRefresh
-          d.instance.onRefresh @props.ctx, ReactDOM.findDOMNode(@), @props.meta
-
-    @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback, componentWillReceiveProps: receiveProps
+    @reactClass = React.createClass componentDidMount: mountedCallback, render: renderCallback
 
 
   _denormalizeRepeat: ->
